@@ -1,3 +1,7 @@
+"""
+Likelihood Lab
+XingYu
+"""
 from sklearn import datasets
 import numpy as np
 import matplotlib.pyplot as plt
@@ -50,8 +54,8 @@ class Knn:
     def _vote(self, neighbor):
         # Find candidate target
         target_list = []
-        for index in neighbor:
-            target_list.append(self._y_train[index])
+        for ind in neighbor:
+            target_list.append(self._y_train[ind])
 
         # Voting
         result = max(target_list, key=target_list.count)
@@ -64,23 +68,21 @@ if __name__ == '__main__':
     # Import digits data
     digits = datasets.load_digits()
 
-    # Hyper-parameter
-    train_rate = 0.2
-
-    # Get input and output
-    image_set = digits['data']  # Contains 1797 (8 by 8) digit images
-    target_set = digits['target']  # Contains the corresponding answers to the digits
-
     # Data set visualization
     images_and_labels = list(zip(digits.images, digits.target))
     for index, (image, label) in enumerate(images_and_labels[:10]):
         plt.subplot(2, 5, index + 1)
         plt.axis('off')
-        plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
+        plt.imshow(image)
         plt.title('Label: %i' % label)
     plt.show()
 
+    # Get input and output
+    image_set = digits['data']  # Contains 1797 (8 by 8) digit images
+    target_set = digits['target']  # Contains the corresponding answers to the digits
+
     # Split train set and test set
+    train_rate = 0.1
     sample_num = len(image_set)
     x_train_set = image_set[:int(train_rate * sample_num)]
     y_train_set = target_set[:int(train_rate * sample_num)]
