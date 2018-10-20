@@ -73,6 +73,8 @@ if __name__ == '__main__':
     image_set = digits['data']  # Contains 1797 (8 by 8) digit images
     target_set = digits['target']  # Contains the corresponding answers to the digits
 
+    # Plot some digits
+
     # Split train set and test set
     sample_num = len(image_set)
     x_train_set = image_set[:int(train_rate * sample_num)]
