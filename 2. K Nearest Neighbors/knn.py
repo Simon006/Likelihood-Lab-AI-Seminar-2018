@@ -15,7 +15,6 @@ class Knn:
             raise ValueError("length doesn't match")
 
         y_predict = []
-        # Loop through the test set
         for sample in x_test:
             # Find K nearest neighbors
             neighbor_list = self._neighbor_search(sample)
@@ -73,7 +72,14 @@ if __name__ == '__main__':
     image_set = digits['data']  # Contains 1797 (8 by 8) digit images
     target_set = digits['target']  # Contains the corresponding answers to the digits
 
-    # Plot some digits
+    # Data set visualization
+    images_and_labels = list(zip(digits.images, digits.target))
+    for index, (image, label) in enumerate(images_and_labels[:10]):
+        plt.subplot(2, 5, index + 1)
+        plt.axis('off')
+        plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
+        plt.title('Label: %i' % label)
+    plt.show()
 
     # Split train set and test set
     sample_num = len(image_set)
@@ -91,11 +97,11 @@ if __name__ == '__main__':
 
     # See the performance of different hyper-parameter k
     acc_list = []
-    for k in range(1, 20):
-        agent = Knn(k, x_train_set, y_train_set)
+    for neighbor_num in range(1, 20):
+        agent = Knn(neighbor_num, x_train_set, y_train_set)
         _, acc = agent.predict(x_test_set, y_test_set)
         acc_list.append(acc)
-        print('Prediction Accuracy with ' + str(k) + ' neighbors: ' + str(acc))
+        print('Prediction Accuracy with ' + str(neighbor_num) + ' neighbors: ' + str(acc))
 
     fig = plt.figure(figsize=(25, 10))
     ax = fig.add_subplot(111)
