@@ -66,7 +66,6 @@ if __name__ == '__main__':
 
     # Hyper-parameter
     train_rate = 0.2
-    neighbor_num = 2
 
     # Get input and output
     image_set = digits['data']  # Contains 1797 (8 by 8) digit images
@@ -88,21 +87,13 @@ if __name__ == '__main__':
     x_test_set = image_set[int(train_rate * sample_num):]
     y_test_set = target_set[int(train_rate * sample_num):]
 
-    # Construct KNN classifier
-    knn_classifier = Knn(neighbor_num, x_train_set, y_train_set)
-
-    # Predict and Performance Evaluation
-    _, accuracy = knn_classifier.predict(x_test_set, y_test_set)
-    print('Prediction Accuracy: ' + str(accuracy))
-
     # See the performance of different hyper-parameter k
     acc_list = []
-    for neighbor_num in range(1, 20):
+    for neighbor_num in range(1, 30):
         agent = Knn(neighbor_num, x_train_set, y_train_set)
         _, acc = agent.predict(x_test_set, y_test_set)
         acc_list.append(acc)
         print('Prediction Accuracy with ' + str(neighbor_num) + ' neighbors: ' + str(acc))
-
     fig = plt.figure(figsize=(25, 10))
     ax = fig.add_subplot(111)
     ax.plot(acc_list, color='r', label='Accuracy')
