@@ -82,7 +82,7 @@ if __name__ == '__main__':
     target_set = digits['target']  # Contains the corresponding answers to the digits
 
     # Split train set and test set
-    train_rate = 0.1
+    train_rate = 0.5
     sample_num = len(image_set)
     x_train_set = image_set[:int(train_rate * sample_num)]
     y_train_set = target_set[:int(train_rate * sample_num)]
@@ -96,7 +96,7 @@ if __name__ == '__main__':
         _, acc = agent.predict(x_test_set, y_test_set)
         acc_list.append(acc)
         print('Prediction Accuracy with ' + str(neighbor_num) + ' neighbors: ' + str(acc))
-    fig = plt.figure(figsize=(25, 10))
+    fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(111)
     ax.plot(acc_list, color='r', label='Accuracy')
     ax.legend(loc=1)
