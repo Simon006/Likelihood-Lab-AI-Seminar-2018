@@ -2,22 +2,26 @@
 Likelihood Lab
 XingYu
 """
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_breast_cancer
+import random as rd
 
 class Logistic:
-    def __init__(self):
+    def __init__(self, learning_rate):
+        self._learning_rate = learning_rate
 
 
 if __name__ == '__main__':
-
     # Import iris data
-    iris = load_iris()
+    iris = load_breast_cancer()
 
     # Separate input(x) and output(y)
-    data_x = iris['data']  # Four attributes: Sepal.Length（花萼长度）、Sepal.Width（花萼宽度）、
-                           # Petal.Length（花瓣长度）、Petal.Width（花瓣宽度）
+    data_x = iris['data']
+    data_y = iris['target']
 
-    data_y = iris['target']  # Three classes:Iris Setosa（山鸢尾）、Iris Versicolour（杂色鸢尾），
-                             # Iris Virginica（维吉尼亚鸢尾）
+    # Shuffle the data
+    random_idx = rd.sample([i for i in range(len(data_x))], len(data_x))
+    data_x = data_x[random_idx]
+    data_y = data_y[random_idx]
+    print(data_y)
 
     # Separate training and testing data set
