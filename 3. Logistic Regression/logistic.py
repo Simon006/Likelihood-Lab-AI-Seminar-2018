@@ -147,3 +147,11 @@ if __name__ == '__main__':
     plt.xlabel('FeatureNumber')
     plt.ylabel('Importance')
     plt.show()
+
+    # Plot the logistic function
+    x = np.linspace(-5, 5, 10000)
+    y = np.array([1/(1+exp(-value)) for value in x])
+    plt.plot(x, y, color='b')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.show()
