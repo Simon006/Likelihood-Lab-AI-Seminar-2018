@@ -77,7 +77,7 @@ if __name__ == '__main__':
     data_x = breast_cancer['data']
     data_y = breast_cancer['target']
 
-    # Normalize the data's column
+    # Normalize the data's column to [0,1]
     for j in range(len(data_x[0])):
         min_value = min([data_x[i][j] for i in range(len(data_x))])
         max_value = max([data_x[i][j] for i in range(len(data_x))])
