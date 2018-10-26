@@ -13,6 +13,13 @@ class Knn:
         self._x_train = x_train
         self._y_train = y_train
 
+    def train(self):
+        """
+        KNN is a lazy learning algorithm.
+        Therefore, its train function is void.
+        """
+        pass
+
     def predict(self, x_test, y_test):
         # Check length error
         if len(x_test) != len(y_test):
