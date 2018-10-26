@@ -63,7 +63,7 @@ class Logistic:
         return mse, accuracy
 
     def feature_importance(self):
-        pass
+        return abs(self._weight)
 
     def _logistic(self, z):
         return 1 / (1 + exp(-z))
@@ -101,25 +101,49 @@ if __name__ == '__main__':
     # See the effect of epoch parameter
     mse_list = []
     acc_list = []
-    for epoch in range(1, 200, 2):
+    epoch_list = [i+1 for i in range(200)]
+    for epoch in epoch_list:
         lg = Logistic(len(data_x[0]), 0.01, epoch)
         lg.train(train_x, train_y)
         mse, acc = lg.evaluate(test_x, test_y)
         mse_list.append(mse)
         acc_list.append(acc)
 
-    plt.plot(acc_list)
+    plt.plot(epoch_list, mse_list, color='lightgray')
+    plt.xlabel('Epoch')
+    plt.ylabel('MSE')
     plt.show()
 
-    # See the effect of learning rate
+    plt.plot(epoch_list, acc_list, color='lightgray')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.show()
+
+    # See the effect of learning rate parameter
     mse_list = []
     acc_list = []
-    for lr in np.linspace(0.05, 1.0, 30):
+    lr_array = np.linspace(0.05, 25.0, 300)
+    for lr in lr_array:
         lg = Logistic(len(data_x[0]), lr, 1)
         lg.train(train_x, train_y)
         mse, acc = lg.evaluate(test_x, test_y)
         mse_list.append(mse)
         acc_list.append(acc)
 
-    plt.plot(acc_list)
+    plt.plot(lr_array, mse_list, color='lightgray')
+    plt.xlabel('LearningRate')
+    plt.ylabel('MSE')
+    plt.show()
+
+    plt.plot(lr_array, acc_list, color='lightgray')
+    plt.xlabel('LearningRate')
+    plt.ylabel('Accuracy')
+    plt.show()
+
+    # See feature importance
+    lg = Logistic(len(data_x[0]), 0.1, 20)
+    lg.train(train_x, train_y)
+    plt.plot(lg.feature_importance(), color='lightgray')
+    plt.xlabel('FeatureNumber')
+    plt.ylabel('Importance')
     plt.show()
