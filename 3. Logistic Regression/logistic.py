@@ -70,7 +70,7 @@ class Logistic:
 
 
 if __name__ == '__main__':
-    # Import iris data
+    # Import breast cancer data
     breast_cancer = load_breast_cancer()
 
     # Separate input(x) and output(y)
