@@ -98,8 +98,28 @@ if __name__ == '__main__':
     test_x = data_x[train_sample_num:]
     test_y = data_y[train_sample_num:]
 
-    lg = Logistic(len(data_x[0]), 0.1, 400)
-    lg.train(train_x, train_y)
-    mse, acc = lg.evaluate(test_x, test_y)
-    print(mse)
-    print(acc)
+    # See the effect of epoch parameter
+    mse_list = []
+    acc_list = []
+    for epoch in range(1, 200, 2):
+        lg = Logistic(len(data_x[0]), 0.01, epoch)
+        lg.train(train_x, train_y)
+        mse, acc = lg.evaluate(test_x, test_y)
+        mse_list.append(mse)
+        acc_list.append(acc)
+
+    plt.plot(acc_list)
+    plt.show()
+
+    # See the effect of learning rate
+    mse_list = []
+    acc_list = []
+    for lr in np.linspace(0.05, 1.0, 30):
+        lg = Logistic(len(data_x[0]), lr, 1)
+        lg.train(train_x, train_y)
+        mse, acc = lg.evaluate(test_x, test_y)
+        mse_list.append(mse)
+        acc_list.append(acc)
+
+    plt.plot(acc_list)
+    plt.show()
