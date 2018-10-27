@@ -49,6 +49,7 @@ class DecisionTree:
 
             while True:
 
+
                 if current_node.is_terminal:
                     y_predict.append(current_node.category)
                     break
@@ -80,13 +81,24 @@ class DecisionTree:
 
         if condition1 and condition2:
             node_left, x_left, y_left, node_right, x_right, y_right = self._split(node, x, y)
+            if len(x_left) == 0 or len(x_right) == 0:
+                node.is_terminal = True
+                node.category = max(list(y), key=list(y).count)
+                node.left_node = None
+                node.right_node = None
 
-            self._build_tree(node_left, x_left, y_left)
 
-            self._build_tree(node_right, x_right, y_right)
+                return 0
+            else:
+                self._build_tree(node_left, x_left, y_left)
+                self._build_tree(node_right, x_right, y_right)
         else:
             node.is_terminal = True
             node.category = max(list(y), key=list(y).count)
+            node.left_node = None
+            node.right_node = None
+
+
             return 0
 
     def _split(self, node, x, y):
@@ -139,10 +151,10 @@ class DecisionTree:
                 right_y_list.append(label)
 
         left_y_stat_dict = Counter(left_y_list)
-        gini_value_left = 1 - sum([(left_y_stat_dict[key]/len(left_y_list))**2 for key in left_y_stat_dict])
+        gini_value_left = sum([(left_y_stat_dict[key]/len(left_y_list))*(1-(left_y_stat_dict[key]/len(left_y_list))) for key in left_y_stat_dict])
 
         right_y_stat_dict = Counter(right_y_list)
-        gini_value_right = 1 - sum([(right_y_stat_dict[key]/len(right_y_list))**2 for key in right_y_stat_dict])
+        gini_value_right = sum([(right_y_stat_dict[key]/len(right_y_list))*(1-(right_y_stat_dict[key]/len(right_y_list))) for key in right_y_stat_dict])
 
         gini_value = gini_value_left + gini_value_right
 
@@ -161,7 +173,7 @@ if __name__ == '__main__':
     iris_x = iris_x[random_idx]
     iris_y = iris_y[random_idx]
 
-    dt = DecisionTree(len(iris_x[0]), 3, 10000000000, 50)
+    dt = DecisionTree(len(iris_x[0]), 3, 20, 2)
     dt.train(iris_x, iris_y)
     acc = dt.evaluate(iris_x, iris_y)
     print(acc)
