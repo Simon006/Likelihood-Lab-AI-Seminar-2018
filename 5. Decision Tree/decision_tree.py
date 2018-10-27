@@ -2,6 +2,13 @@
 Likelihood Lab
 XingYu
 """
+
+"""
+still testing
+
+There are bugs!!!!!!!!!
+"""
+
 import numpy as np
 from collections import Counter
 from sklearn.datasets import load_iris
@@ -143,10 +150,6 @@ class DecisionTree:
 
 
 if __name__ == '__main__':
-
-    """
-    still testing
-    """
 
     iris = load_iris()
 
