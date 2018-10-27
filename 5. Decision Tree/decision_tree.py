@@ -18,11 +18,10 @@ class Node:
 
 
 class DecisionTree:
-    def __init__(self, input_dim, class_num, split_criterion, maximal_depth, minimal_samples):
+    def __init__(self, input_dim, class_num, maximal_depth, minimal_samples):
         # Basic Classifier Information
         self._input_dim = input_dim
         self._class_num = class_num
-        self._split_criterion = split_criterion
         self._maximal_depth = maximal_depth
         self._minimal_samples = minimal_samples
 
@@ -55,15 +54,10 @@ class DecisionTree:
         for i in range(self._input_dim):
             for sample in x:
 
-                if self._split_criterion == 'gini':
-                    value, x_left, y_left, x_right, y_right = self._gini(i, sample[i], x, y)
-                elif self._split_criterion == 'cross_entropy':
-                    value, x_left, y_left, x_right, y_right = self._cross_entropy(i, sample[i], x, y)
-                else:
-                    raise ValueError('self._split_criterion cannot be ' + self._split_criterion)
+                gini_value, x_left, y_left, x_right, y_right = self._gini(i, sample[i], x, y)
 
-                if value < best_value:
-                    best_value = value
+                if gini_value < best_value:
+                    best_value = gini_value
                     best_index = i
                     best_x_left = x_left
                     best_y_left = y_left
@@ -77,7 +71,21 @@ class DecisionTree:
         return node.leaf_node, best_x_left, best_y_left, node.right_node, best_x_right, best_y_right
 
     def _gini(self, index, value, x, y):
-        pass
+        left_x_list = []
+        left_y_list = []
+        right_x_list = []
+        right_y_list = []
 
-    def _cross_entropy(self, index, value, x, y):
-        pass
+        for i in range(len(x)):
+            sample = x[i]
+            label = y[i]
+            if sample[index] < value:
+                left_x_list.append(sample)
+                left_y_list.append(label)
+            else:
+                right_x_list.append(sample)
+                right_y_list.append(label)
+
+        gini_value =
+
+        return gini_value, np.array(left_x_list), np.array(left_y_list), np.array(right_x_list), np.array(right_y_list)
