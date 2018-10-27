@@ -13,11 +13,11 @@ class Node:
     def __init__(self):
         self.split_index = None
         self.split_value = None
-        self.leaf_node = None
+        self.left_node = None
         self.right_node = None
         self.is_terminal = False
-        self.category = None
         self.depth = 0
+        self.category = None
 
 
 class DecisionTree:
@@ -46,7 +46,7 @@ class DecisionTree:
                     y_predict.append(current_node.category)
                     break
                 elif sample[current_node.split_index] < current_node.split_value:
-                    current_node = current_node.leaf_node
+                    current_node = current_node.left_node
                 else:
                     current_node = current_node.right_node
 
@@ -72,28 +72,19 @@ class DecisionTree:
         condition2 = node.depth < self._maximal_depth
 
         if condition1 and condition2:
-            x_left, y_left, x_right, y_right = self._split(node, x, y)
-            if len(x_left) == 0 or len(x_right) == 0:
-                node.is_terminal = True
-                node.category = max(list(y), key=list(y).count)
-            else:
-                node_left = Node()
-                node_left.depth = node.depth + 1
-                node.leaf_node = self._build_tree(node_left, x_left, y_left)
-                node_right = Node()
-                node_right.depth = node.depth + 1
-                node.right_node = self._build_tree(node_right, x_right, y_right)
+            node_left, x_left, y_left, node_right, x_right, y_right = self._split(node, x, y)
+
+            self._build_tree(node_left, x_left, y_left)
+
+            self._build_tree(node_right, x_right, y_right)
         else:
             node.is_terminal = True
             node.category = max(list(y), key=list(y).count)
-            print(node.category)
-            return node
-
-        return node
+            return 0
 
     def _split(self, node, x, y):
 
-        best_value = 10000000000000
+        best_value = 100000000
         best_index = None
         best_x_left = None
         best_y_left = None
@@ -106,8 +97,8 @@ class DecisionTree:
                 gini_value, x_left, y_left, x_right, y_right = self._gini(i, sample[i], x, y)
 
                 if gini_value < best_value:
-                    best_value = gini_value
                     best_index = i
+                    best_value = gini_value
                     best_x_left = x_left
                     best_y_left = y_left
                     best_x_right = x_right
@@ -115,7 +106,14 @@ class DecisionTree:
 
         node.split_index = best_index
         node.split_value = best_value
-        return best_x_left, best_y_left, best_x_right, best_y_right
+
+        node.left_node = Node()
+        node.left_node.depth = node.depth + 1
+
+        node.right_node = Node()
+        node.right_node.depth = node.depth + 1
+
+        return node.right_node, best_x_left, best_y_left, node.right_node, best_x_right, best_y_right
 
     def _gini(self, index, value, x, y):
         left_x_list = []
@@ -135,8 +133,10 @@ class DecisionTree:
 
         left_y_stat_dict = Counter(left_y_list)
         gini_value_left = 1 - sum([(left_y_stat_dict[key]/len(left_y_list))**2 for key in left_y_stat_dict])
+
         right_y_stat_dict = Counter(right_y_list)
         gini_value_right = 1 - sum([(right_y_stat_dict[key]/len(right_y_list))**2 for key in right_y_stat_dict])
+
         gini_value = gini_value_left + gini_value_right
 
         return gini_value, np.array(left_x_list), np.array(left_y_list), np.array(right_x_list), np.array(right_y_list)
@@ -158,7 +158,7 @@ if __name__ == '__main__':
     iris_x = iris_x[random_idx]
     iris_y = iris_y[random_idx]
 
-    dt = DecisionTree(4, 3, 10000000000, 2)
+    dt = DecisionTree(len(iris_x[0]), 3, 10000000000, 50)
     dt.train(iris_x, iris_y)
     acc = dt.evaluate(iris_x, iris_y)
     print(acc)
