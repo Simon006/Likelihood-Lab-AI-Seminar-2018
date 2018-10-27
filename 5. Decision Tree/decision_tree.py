@@ -3,6 +3,7 @@ Likelihood Lab
 XingYu
 """
 import numpy as np
+from collections import Counter
 from sklearn.datasets import load_iris
 import matplotlib.pyplot as plt
 
@@ -15,6 +16,7 @@ class Node:
         self.right_node = None
         self.is_terminal = None
         self.category = None
+        self.depth = 0
 
 
 class DecisionTree:
@@ -38,9 +40,17 @@ class DecisionTree:
         pass
 
     def _built_tree(self, node, x, y):
-        node_left, x_left, y_left, node_right, x_right, y_right = self._split(node, x, y)
-        self._built_tree(node_left, x_left, y_left)
-        self._built_tree(node_right, x_right, y_right)
+        condition1 = len(x) > self._minimal_samples
+        condition2 = node.depth < self._maximal_depth
+
+        if condition1 and condition2:
+            node_left, x_left, y_left, node_right, x_right, y_right = self._split(node, x, y)
+            self._built_tree(node_left, x_left, y_left)
+            self._built_tree(node_right, x_right, y_right)
+        else:
+            node.is_terminal = True
+            node.category = max(y, key=y.count)
+            return 0
 
     def _split(self, node, x, y):
 
@@ -68,6 +78,8 @@ class DecisionTree:
         node.split_value = best_value
         node.leaf_node = Node()
         node.right_node = Node()
+        node.leaf_node.depth = node.depth + 1
+        node.right_node.depth = node.depth + 1
         return node.leaf_node, best_x_left, best_y_left, node.right_node, best_x_right, best_y_right
 
     def _gini(self, index, value, x, y):
@@ -86,6 +98,14 @@ class DecisionTree:
                 right_x_list.append(sample)
                 right_y_list.append(label)
 
-        gini_value =
+        left_y_stat_dict = Counter(left_y_list)
+        gini_value_left = 1 - sum([(left_y_stat_dict[key]/len(left_y_list))**2 for key in left_y_stat_dict])
+        right_y_stat_dict = Counter(right_y_list)
+        gini_value_right = 1 - sum([(right_y_stat_dict[key]/len(right_y_list))**2 for key in left_y_stat_dict])
+        gini_value = gini_value_left + gini_value_right
 
         return gini_value, np.array(left_x_list), np.array(left_y_list), np.array(right_x_list), np.array(right_y_list)
+
+
+if __name__ == '__main__':
+
