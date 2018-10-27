@@ -136,6 +136,9 @@ class DecisionTree:
 
 if __name__ == '__main__':
 
+    """
+    still testing
+    """
     iris = load_iris()
 
     iris_x = iris['data']
