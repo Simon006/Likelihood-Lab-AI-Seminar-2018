@@ -5,7 +5,7 @@ XingYu
 import numpy as np
 from collections import Counter
 from sklearn.datasets import load_iris
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 class Node:
@@ -34,22 +34,49 @@ class DecisionTree:
         self._build_tree(self._root, x, y)
 
     def predict(self, x):
-        pass
+        y_predict = []
+        for sample in x:
+
+            current_node = self._root
+
+            while True:
+
+                if current_node.is_terminal:
+                    y_predict.append(current_node.category)
+                    break
+                elif sample[current_node.split_index] < current_node.split_value:
+                    current_node = current_node.leaf_node
+                else:
+                    current_node = current_node.right_node
+
+        return np.array(y_predict)
 
     def evaluate(self, x, y):
-        pass
 
-    def _built_tree(self, node, x, y):
+        y_predict = self.predict(x)
+
+        correct_num = 0
+        for i in range(len(y)):
+            if y[i] == y_predict[i]:
+                correct_num += 1
+            else:
+                continue
+
+        accuracy = correct_num / len(y)
+
+        return accuracy
+
+    def _build_tree(self, node, x, y):
         condition1 = len(x) > self._minimal_samples
         condition2 = node.depth < self._maximal_depth
 
         if condition1 and condition2:
             node_left, x_left, y_left, node_right, x_right, y_right = self._split(node, x, y)
-            self._built_tree(node_left, x_left, y_left)
-            self._built_tree(node_right, x_right, y_right)
+            self._build_tree(node_left, x_left, y_left)
+            self._build_tree(node_right, x_right, y_right)
         else:
             node.is_terminal = True
-            node.category = max(y, key=y.count)
+            node.category = max(list(y), key=list(y).count)
             return 0
 
     def _split(self, node, x, y):
@@ -109,3 +136,12 @@ class DecisionTree:
 
 if __name__ == '__main__':
 
+    iris = load_iris()
+
+    iris_x = iris['data']
+    iris_y = iris['target']
+
+    dt = DecisionTree(4, 3, 100, 1)
+    dt.train(iris_x, iris_y)
+    acc = dt.evaluate(iris_x, iris_y)
+    print(acc)
