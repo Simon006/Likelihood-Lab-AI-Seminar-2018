@@ -6,8 +6,9 @@ XingYu
 
 import numpy as np
 import random as rd
+import matplotlib.pyplot as plt
 from collections import Counter
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_wine
 
 
 class Node:
@@ -105,7 +106,6 @@ class DecisionTree:
             return 0
 
     def _split(self, x, y):
-
         best_gini = 100000000
         best_split_index = None
         best_split_value = None
@@ -158,22 +158,49 @@ class DecisionTree:
 
 if __name__ == '__main__':
 
-    iris = load_iris()
+    # load wine data
+    # each sample has 13 features and 3 possible classes
+    wine = load_wine()
+    wine_x = wine['data']
+    wine_y = wine['target']
 
-    iris_x = iris['data']
-    iris_y = iris['target']
+    # shuffle the data randomly
+    random_idx = rd.sample([i for i in range(len(wine_x))], len(wine_x))
+    wine_x = wine_x[random_idx]
+    wine_y = wine_y[random_idx]
 
-    # Shuffle the data
-    random_idx = rd.sample([i for i in range(len(iris_x))], len(iris_x))
-    iris_x = iris_x[random_idx]
-    iris_y = iris_y[random_idx]
+    # split the data into training data set and testing data set
+    train_rate = 0.7
+    train_num = int(train_rate*len(wine_x))
+    train_x = wine_x[:train_num]
+    train_y = wine_y[:train_num]
+    test_x = wine_x[train_num:]
+    test_y = wine_y[train_num:]
 
-    train_x = iris_x[:int(0.5*len(iris_x))]
-    train_y = iris_y[:int(0.5*len(iris_y))]
-    test_x = iris_x[int(0.5*len(iris_x)):]
-    test_y = iris_y[int(0.5*len(iris_y)):]
+    # construct decision tree classifier and compare the performance of different maximal depth
+    acc_list = []
+    depth_list = [(i+1) for i in range(20)]
+    for depth in depth_list:
+        dt = DecisionTree(input_dim=4, class_num=3, maximal_depth=depth, minimal_samples=1)
+        dt.train(train_x, train_y)
+        acc = dt.evaluate(test_x, test_y)
+        acc_list.append(acc)
+    plt.plot(depth_list, acc_list, marker='^', color='lightgray')
+    plt.xlabel('Maximal Depth')
+    plt.ylabel('Accuracy')
+    plt.title('Performance of different maximal length')
+    plt.show()
 
-    dt = DecisionTree(len(iris_x[0]), 3, 15, 2)
-    dt.train(train_x, train_y)
-    acc = dt.evaluate(test_x, test_y)
-    print(acc)
+    # construct decision tree classifier and compare the performance of different minimal samples
+    acc_list = []
+    sample_num_list = [(i+1) for i in range(30)]
+    for sample_num in sample_num_list:
+        dt = DecisionTree(input_dim=4, class_num=3, maximal_depth=1000, minimal_samples=sample_num)
+        dt.train(train_x, train_y)
+        acc = dt.evaluate(test_x, test_y)
+        acc_list.append(acc)
+    plt.plot(sample_num_list, acc_list, marker='^', color='lightgray')
+    plt.xlabel('Minimal Samples Number')
+    plt.ylabel('Accuracy')
+    plt.title('Performance of different minimal samples number')
+    plt.show()
