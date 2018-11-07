@@ -3,33 +3,30 @@ Likelihood Lab
 XingYu
 """
 
-"""
-still testing
-
-There are bugs!!!!!!!!!
-"""
 
 import numpy as np
+import random as rd
 from collections import Counter
 from sklearn.datasets import load_iris
-# import matplotlib.pyplot as plt
-import random as rd
 
 
 class Node:
     def __init__(self):
+        # node information
+        self.depth = 0
         self.split_index = None
         self.split_value = None
+        self.category = None
+        self.is_terminal = False
+
+        # children nodes
         self.left_node = None
         self.right_node = None
-        self.is_terminal = False
-        self.depth = 0
-        self.category = None
 
 
 class DecisionTree:
     def __init__(self, input_dim, class_num, maximal_depth, minimal_samples):
-        # Basic Classifier Information
+        # basic classifier information
         self._input_dim = input_dim
         self._class_num = class_num
         self._maximal_depth = maximal_depth
@@ -48,8 +45,6 @@ class DecisionTree:
             current_node = self._root
 
             while True:
-
-
                 if current_node.is_terminal:
                     y_predict.append(current_node.category)
                     break
@@ -76,35 +71,44 @@ class DecisionTree:
         return accuracy
 
     def _build_tree(self, node, x, y):
-        condition1 = len(x) > self._minimal_samples
-        condition2 = node.depth < self._maximal_depth
+        condition1 = len(x) > self._minimal_samples  # enough training data
+        condition2 = node.depth < self._maximal_depth  # avoid tree that is too complicated
 
         if condition1 and condition2:
-            node_left, x_left, y_left, node_right, x_right, y_right = self._split(node, x, y)
-            if len(x_left) == 0 or len(x_right) == 0:
+            best_split_index, best_split_value, x_left, y_left, x_right, y_right = self._split(x, y)
+            if (len(x_left) == 0) or (len(x_right) == 0):
+                node.split_index = None
+                node.split_value = None
                 node.is_terminal = True
                 node.category = max(list(y), key=list(y).count)
                 node.left_node = None
                 node.right_node = None
-
-
                 return 0
             else:
-                self._build_tree(node_left, x_left, y_left)
-                self._build_tree(node_right, x_right, y_right)
+                node.split_index = best_split_index
+                node.split_value = best_split_value
+                node.is_terminal = False
+                node.category = None
+                node.left_node = Node()
+                node.right_node = Node()
+                node.left_node.depth = node.depth + 1
+                node.right_node.depth = node.depth + 1
+                self._build_tree(node.left_node, x_left, y_left)
+                self._build_tree(node.right_node, x_right, y_right)
         else:
-            node.is_terminal = True
-            node.category = max(list(y), key=list(y).count)
+            node.split_index = None
+            node.split_value = None
+            node.is_terminal = True  # create leaf node
+            node.category = max(list(y), key=list(y).count)  # majority voting
             node.left_node = None
             node.right_node = None
-
-
             return 0
 
-    def _split(self, node, x, y):
+    def _split(self, x, y):
 
-        best_value = 100000000
-        best_index = None
+        best_gini = 100000000
+        best_split_index = None
+        best_split_value = None
         best_x_left = None
         best_y_left = None
         best_x_right = None
@@ -112,27 +116,18 @@ class DecisionTree:
 
         for i in range(self._input_dim):
             for sample in x:
+                gini, x_left, y_left, x_right, y_right = self._gini(i, sample[i], x, y)
 
-                gini_value, x_left, y_left, x_right, y_right = self._gini(i, sample[i], x, y)
-
-                if gini_value < best_value:
-                    best_index = i
-                    best_value = gini_value
+                if gini < best_gini:
+                    best_gini = gini
+                    best_split_index = i
+                    best_split_value = sample[i]
                     best_x_left = x_left
                     best_y_left = y_left
                     best_x_right = x_right
                     best_y_right = y_right
 
-        node.split_index = best_index
-        node.split_value = best_value
-
-        node.left_node = Node()
-        node.left_node.depth = node.depth + 1
-
-        node.right_node = Node()
-        node.right_node.depth = node.depth + 1
-
-        return node.right_node, best_x_left, best_y_left, node.right_node, best_x_right, best_y_right
+        return best_split_index, best_split_value, best_x_left, best_y_left, best_x_right, best_y_right
 
     def _gini(self, index, value, x, y):
         left_x_list = []
@@ -173,7 +168,7 @@ if __name__ == '__main__':
     iris_x = iris_x[random_idx]
     iris_y = iris_y[random_idx]
 
-    dt = DecisionTree(len(iris_x[0]), 3, 20, 2)
+    dt = DecisionTree(len(iris_x[0]), 3, 30, 3)
     dt.train(iris_x, iris_y)
     acc = dt.evaluate(iris_x, iris_y)
     print(acc)
