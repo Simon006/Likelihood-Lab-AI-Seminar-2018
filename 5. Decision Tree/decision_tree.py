@@ -243,7 +243,7 @@ if __name__ == '__main__':
     wine_y = wine_y[random_idx]
 
     # split the data into training data set and testing data set
-    train_rate = 0.6
+    train_rate = 0.7
     train_num = int(train_rate*len(wine_x))
     train_x = wine_x[:train_num]
     train_y = wine_y[:train_num]
