@@ -39,12 +39,22 @@ class DecisionTree:
         self._root = Node()
 
     def train(self, x, y):
+        # check dimensionality
+        if len(x[0]) != self._input_dim:
+            raise ValueError('input dimension does not match.')
+
+        # construct the tree recursively
         self._build_tree(self._root, x, y)
 
     def predict(self, x):
+        # check dimensionality
+        if len(x[0]) != self._input_dim:
+            raise ValueError('input dimension does not match.')
+
         y_predict = []
         for sample in x:
             current_node = self._root
+            # classification by iterative bisection
             while True:
                 if current_node.is_terminal:
                     y_predict.append(current_node.category)
@@ -56,6 +66,10 @@ class DecisionTree:
         return np.array(y_predict)
 
     def evaluate(self, x, y):
+        # check dimensionality
+        if len(x[0]) != self._input_dim:
+            raise ValueError('input dimension does not match.')
+
         y_predict = self.predict(x)
         correct_num = 0
         for i in range(len(y)):
@@ -76,7 +90,7 @@ class DecisionTree:
                 node.split_index = None
                 node.split_value = None
                 node.is_terminal = True
-                node.category = max(list(y), key=list(y).count)
+                node.category = max(list(y), key=list(y).count)  # majority voting
                 node.left_node = None
                 node.right_node = None
                 return 0
@@ -89,8 +103,8 @@ class DecisionTree:
                 node.right_node = Node()
                 node.left_node.depth = node.depth + 1
                 node.right_node.depth = node.depth + 1
-                self._build_tree(node.left_node, x_left, y_left)
-                self._build_tree(node.right_node, x_right, y_right)
+                self._build_tree(node.left_node, x_left, y_left)  # recursion
+                self._build_tree(node.right_node, x_right, y_right)  # recursion
         else:
             node.split_index = None
             node.split_value = None
@@ -101,7 +115,7 @@ class DecisionTree:
             return 0
 
     def _split(self, x, y):
-        best_performance = 100000000
+        best_classification_performance = 100000000
         best_split_index = None
         best_split_value = None
         best_x_left = None
@@ -118,8 +132,8 @@ class DecisionTree:
                 else:
                     raise ValueError('self._criterion cannot be ' + self._criterion)
 
-                if classification_performance < best_performance:
-                    best_performance = classification_performance
+                if classification_performance < best_classification_performance:
+                    best_classification_performance = classification_performance
                     best_split_index = i
                     best_split_value = sample[i]
                     best_x_left = x_left
