@@ -252,7 +252,7 @@ if __name__ == '__main__':
 
     # construct decision tree classifier and compare the performance of different maximal depth
     acc_list = []
-    depth_list = [(i+1) for i in range(20)]
+    depth_list = [(i+1) for i in range(100)]
     for depth in depth_list:
         dt = DecisionTree(input_dim=13, class_num=3, maximal_depth=depth, minimal_samples=1)
         dt.train(train_x, train_y)
@@ -266,7 +266,7 @@ if __name__ == '__main__':
 
     # construct decision tree classifier and compare the performance of different minimal samples
     acc_list = []
-    sample_num_list = [(i+1) for i in range(30)]
+    sample_num_list = [(i+1) for i in range(100)]
     for sample_num in sample_num_list:
         dt = DecisionTree(input_dim=13, class_num=3, maximal_depth=100, minimal_samples=sample_num, criterion='entropy')
         dt.train(train_x, train_y)
