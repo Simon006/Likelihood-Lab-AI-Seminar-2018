@@ -57,7 +57,7 @@ class DecisionTree:
             # classification by iterative bisection
             while True:
                 if current_node.is_terminal:
-                    y_predict.append(current_node.category)
+                    y_predict.append(current_node.category)  # classify the sample by the terminal point it encounters
                     break
                 elif sample[current_node.split_index] < current_node.split_value:
                     current_node = current_node.left_node
@@ -82,14 +82,14 @@ class DecisionTree:
 
     def _build_tree(self, node, x, y):
         condition1 = len(x) > self._minimal_samples  # enough training data
-        condition2 = node.depth < self._maximal_depth  # avoid tree that is too complicated
+        condition2 = node.depth < self._maximal_depth  # avoid a decision tree that is too complicated
 
         if condition1 and condition2:
             best_split_index, best_split_value, x_left, y_left, x_right, y_right = self._split(x, y)
             if (len(x_left) == 0) or (len(x_right) == 0):
                 node.split_index = None
                 node.split_value = None
-                node.is_terminal = True
+                node.is_terminal = True  # create leaf node
                 node.category = max(list(y), key=list(y).count)  # majority voting
                 node.left_node = None
                 node.right_node = None
@@ -115,13 +115,13 @@ class DecisionTree:
             return 0
 
     def _split(self, x, y):
-        best_classification_performance = 100000000
         best_split_index = None
         best_split_value = None
         best_x_left = None
         best_y_left = None
         best_x_right = None
         best_y_right = None
+        best_classification_performance = 100000000
 
         for i in range(self._input_dim):
             for sample in x:
@@ -200,7 +200,7 @@ class DecisionTree:
                 right_x_list.append(sample)
                 right_y_list.append(label)
 
-        # calculate gini of the left node
+        # calculate entropy of the left node
         # the key of the dictionary(left_y_stat_dict) is class label;
         # the value of dictionary is the corresponding frequency;
         left_y_stat_dict = Counter(left_y_list)
@@ -213,7 +213,7 @@ class DecisionTree:
                 entropy_value_left -= 0
         left_prob = len(left_y_list) / (len(left_y_list) + len(right_y_list))
 
-        # calculate gini of the right node
+        # calculate entropy of the right node
         right_y_stat_dict = Counter(right_y_list)
         entropy_value_right = 0
         for key in right_y_stat_dict:
@@ -224,10 +224,10 @@ class DecisionTree:
                 entropy_value_right -= 0
         right_prob = len(right_y_list) / (len(left_y_list) + len(right_y_list))
 
-        # calculate comprehensive gini
-        gini_value = entropy_value_left * left_prob + entropy_value_right * right_prob
+        # calculate comprehensive entropy
+        entropy = entropy_value_left * left_prob + entropy_value_right * right_prob
 
-        return gini_value, np.array(left_x_list), np.array(left_y_list), np.array(right_x_list), np.array(right_y_list)
+        return entropy, np.array(left_x_list), np.array(left_y_list), np.array(right_x_list), np.array(right_y_list)
 
 
 if __name__ == '__main__':
