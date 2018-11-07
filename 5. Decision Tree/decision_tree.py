@@ -28,14 +28,14 @@ class Node:
 
 class DecisionTree:
     def __init__(self, input_dim, class_num, maximal_depth=1000, minimal_samples=1, criterion='gini'):
-        # basic classifier information
+        # classifier information
         self._input_dim = input_dim
         self._class_num = class_num
         self._maximal_depth = maximal_depth
         self._minimal_samples = minimal_samples
         self._criterion = criterion
 
-        # Define the tree root
+        # define the tree root
         self._root = Node()
 
     def train(self, x, y):
