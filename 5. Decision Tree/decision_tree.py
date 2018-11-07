@@ -42,9 +42,7 @@ class DecisionTree:
     def predict(self, x):
         y_predict = []
         for sample in x:
-
             current_node = self._root
-
             while True:
                 if current_node.is_terminal:
                     y_predict.append(current_node.category)
@@ -53,22 +51,17 @@ class DecisionTree:
                     current_node = current_node.left_node
                 else:
                     current_node = current_node.right_node
-
         return np.array(y_predict)
 
     def evaluate(self, x, y):
-
         y_predict = self.predict(x)
-
         correct_num = 0
         for i in range(len(y)):
             if y[i] == y_predict[i]:
                 correct_num += 1
             else:
                 continue
-
         accuracy = correct_num / len(y)
-
         return accuracy
 
     def _build_tree(self, node, x, y):
@@ -170,7 +163,7 @@ if __name__ == '__main__':
     wine_y = wine_y[random_idx]
 
     # split the data into training data set and testing data set
-    train_rate = 0.7
+    train_rate = 0.6
     train_num = int(train_rate*len(wine_x))
     train_x = wine_x[:train_num]
     train_y = wine_y[:train_num]
@@ -181,7 +174,7 @@ if __name__ == '__main__':
     acc_list = []
     depth_list = [(i+1) for i in range(20)]
     for depth in depth_list:
-        dt = DecisionTree(input_dim=4, class_num=3, maximal_depth=depth, minimal_samples=1)
+        dt = DecisionTree(input_dim=13, class_num=3, maximal_depth=depth, minimal_samples=1)
         dt.train(train_x, train_y)
         acc = dt.evaluate(test_x, test_y)
         acc_list.append(acc)
@@ -195,7 +188,7 @@ if __name__ == '__main__':
     acc_list = []
     sample_num_list = [(i+1) for i in range(30)]
     for sample_num in sample_num_list:
-        dt = DecisionTree(input_dim=4, class_num=3, maximal_depth=1000, minimal_samples=sample_num)
+        dt = DecisionTree(input_dim=13, class_num=3, maximal_depth=1000, minimal_samples=sample_num)
         dt.train(train_x, train_y)
         acc = dt.evaluate(test_x, test_y)
         acc_list.append(acc)
