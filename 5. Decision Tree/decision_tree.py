@@ -168,8 +168,12 @@ if __name__ == '__main__':
     iris_x = iris_x[random_idx]
     iris_y = iris_y[random_idx]
 
-    dt = DecisionTree(len(iris_x[0]), 3, 30, 3)
-    dt.train(iris_x, iris_y)
-    acc = dt.evaluate(iris_x, iris_y)
+    train_x = iris_x[:int(0.5*len(iris_x))]
+    train_y = iris_y[:int(0.5*len(iris_y))]
+    test_x = iris_x[int(0.5*len(iris_x)):]
+    test_y = iris_y[int(0.5*len(iris_y)):]
+
+    dt = DecisionTree(len(iris_x[0]), 3, 15, 2)
+    dt.train(train_x, train_y)
+    acc = dt.evaluate(test_x, test_y)
     print(acc)
-    print(dt.predict(iris_x))
