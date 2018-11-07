@@ -217,7 +217,6 @@ class DecisionTree:
 
 
 if __name__ == '__main__':
-
     # load wine data
     # each sample has 13 features and 3 possible classes
     wine = load_wine()
@@ -241,7 +240,7 @@ if __name__ == '__main__':
     acc_list = []
     depth_list = [(i+1) for i in range(20)]
     for depth in depth_list:
-        dt = DecisionTree(input_dim=13, class_num=3, maximal_depth=depth, minimal_samples=1, criterion='entropy')
+        dt = DecisionTree(input_dim=13, class_num=3, maximal_depth=depth, minimal_samples=1)
         dt.train(train_x, train_y)
         acc = dt.evaluate(test_x, test_y)
         acc_list.append(acc)
