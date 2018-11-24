@@ -68,13 +68,17 @@ class DecisionTree:
 
         y_predict = self.predict(x)
         correct_num = 0
+        mistake_samples_index = []
+        correct_samples_index = []
         for i in range(len(y)):
             if y[i] == y_predict[i]:
                 correct_num += 1
+                correct_samples_index.append(i)
             else:
+                mistake_samples_index.append(i)
                 continue
         accuracy = correct_num / len(y)
-        return accuracy
+        return accuracy, 1 - accuracy, set(correct_samples_index), set(mistake_samples_index)
 
     def _build_tree(self, node, x, y):
         condition1 = len(x) > self._minimal_samples  # enough training data

@@ -1,6 +1,6 @@
 import numpy as np
 import random as rd
-from math import log
+from math import log, exp
 from sklearn.datasets import load_wine
 from decision_tree import DecisionTree
 
@@ -29,17 +29,36 @@ class BoostingTree:
                                                  minimal_samples=self._minimal_samples, criterion=self._criterion)
 
             # sample(with replacement) training data-set with respect to sample_weights
-            x_sampled, y_sampled = ...
+            sample_index = np.zeros(len(x))
+            for counter in range(len(x)):
+                pointer = rd.uniform(0, 1)
+                accumulated_prob = 0
+                for index, w in enumerate(sample_weights):
+                    accumulated_prob += w
+                    if pointer <= accumulated_prob:
+                        sample_index[counter] = index
+                    else:
+                        continue
+            x_sampled, y_sampled = x[sample_index], y[sample_index]
 
             # train the weak learner
             weak_learner.train(x_sampled, y_sampled)
 
             # calculate the weak learner's weight
-            error = 1 - weak_learner.evaluate(x_sampled, y_sampled)
+            acc, error, correct_samples_index, mistake_samples_index = weak_learner.evaluate(x_sampled, y_sampled)
             weak_learner['weight'] = 0.5 * log((1 - error) / error)
 
             # update the sample weights
-            ...
+            # step1: increase the weights of mistaken samples;
+            # step2: decrease the weights of correct samples;
+            # step3: normalize the distribution
+            for i in correct_samples_index:
+                sample_weights[sample_index[i]] * exp(-weak_learner['weight'])
+
+            for i in mistake_samples_index:
+                sample_weights[sample_index[i]] * exp(weak_learner['weight'])
+
+            sample_weights = sample_weights / sum(sample_weights)
 
             # discard the weak learners
             if error < 0.5:
@@ -48,8 +67,24 @@ class BoostingTree:
                 continue
 
     def predict(self, x):
-        for tree in self._weak_trees:
-            tree['model'].predict(x)
+        # each tree conducts the inference process independently
+        y_vote = np.zeros((self._tree_num, len(x)))
+        for index, tree in enumerate(self._weak_trees):
+            y_vote[index] = tree['model'].predict(x)
+
+        # voting with respect to the model weights
+        y_predicted = np.zeros(len(x))
+        for i in range(len(y_predicted)):
+            vote_dict = dict()
+            for t in range(self._tree_num):
+                if y_vote[t][i] in vote_dict:
+                    vote_dict[y_vote[t][i]] += self._weak_trees[t]['weight']
+                else:
+                    vote_dict[y_vote[t][i]] = self._weak_trees[t]['weight']
+
+            y_predicted[i] = max(vote_dict, key=vote_dict.get)
+
+        return y_predicted
 
     def evaluate(self, x, y):
         y_predict = self.predict(x)
