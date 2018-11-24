@@ -24,24 +24,43 @@ class RandomForest:
 
     def train(self, x, y):
         pool = mp.Pool(processes=self._cores_num)
-        pool.map(func=, iterable=[] * self._cores_num)
-        for key in self._forest:
-            self._forest[key]['tree'].train(x, y)
+        pool.map(func=_train_forest_mp, iterable=[(self._forest, x, y)] * self._cores_num)
 
     def predict(self, x):
+        # each tree evaluates the data set independently.
+        y_vote = np.zeros((self._tree_num, len(x)))
+        un_voted_list = [True] * self._tree_num
         pool = mp.Pool(processes=self._cores_num)
-        pool.map(func=, iterable=[] * self._cores_num)
+        pool.map(func=_predict_forest_mp, iterable=[self._forest, x, un_voted_list, y_vote] * self._cores_num)
+
+        # majority voting
+        y_predicted = np.zeros(len(x))
+        for i in range(len(y_predicted)):
+            voted_result = list(y_vote[:,i])
+            y_predicted[i] = max(list(voted_result), key=list(voted_result).count)
+
+        return y_predicted
 
     def evaluate(self, x, y):
-        pass
+        y_predict = self.predict(x)
+        correct_num = 0
+        for i in range(len(y)):
+            if y[i] == y_predict[i]:
+                correct_num += 1
+            else:
+                continue
+        accuracy = correct_num / len(y)
+        return accuracy
 
     def _construct_forest(self):
-        forest = dict()
+        forest = []
         for i in range(self._tree_num):
-            forest[i] = dict()
-            forest[i]['tree'] = DecisionTree(self._tree_input_dim, self._maximal_depth,
-                                             self._minimal_samples, self._criterion)
-            forest[i]['feature'] = self._feature_bagging()
+            tree = dict()
+            tree['model'] = DecisionTree(self._tree_input_dim, self._maximal_depth,
+                                         self._minimal_samples, self._criterion)
+            tree['feature'] = self._feature_bagging()
+            tree['untrained'] = True
+            forest.append(tree)
         return forest
 
     def _feature_bagging(self):
@@ -61,5 +80,32 @@ class RandomForest:
         return feature_mask
 
 
-def _train_tree_():
-    pass
+def _train_forest_mp(forest, train_x, train_y):
+    for i in range(len(forest)):
+        if forest[i]['untrained']:
+            forest[i]['untrained'] = False
+            train_x_sampled, train_y_sampled = _sample_with_replacement(train_x, train_y)
+            forest[i]['model'].train(train_x_sampled[:,forest[i]['feature']], train_y_sampled)
+        else:
+            continue
+
+
+def _predict_forest_mp(forest, x, un_voted_list, y_vote):
+    for i in range(len(forest)):
+        if un_voted_list[i]:
+            un_voted_list[i] = False
+            y_vote[i] = forest[i]['model'].predict(x[:,forest[i]['feature']])
+        else:
+            continue
+
+def _sample_with_replacement(x, y):
+    # check dimensionality
+    if len(x) != len(y):
+        raise ValueError('error.')
+
+    # bootstrap sample
+    sample_index_list = [rd.randrange(len(x)) for i in range(len(x))]
+    x_sampled = x[sample_index_list]
+    y_sampled = y[sample_index_list]
+
+    return x_sampled, y_sampled
