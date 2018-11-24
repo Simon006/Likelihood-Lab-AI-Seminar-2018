@@ -30,7 +30,6 @@ class DecisionTree:
     def __init__(self, input_dim, class_num, maximal_depth=1000, minimal_samples=1, criterion='gini'):
         # classifier information
         self._input_dim = input_dim
-        self._class_num = class_num
         self._maximal_depth = maximal_depth
         self._minimal_samples = minimal_samples
         self._criterion = criterion
@@ -228,52 +227,3 @@ class DecisionTree:
         entropy = entropy_value_left * left_prob + entropy_value_right * right_prob
 
         return entropy, np.array(left_x_list), np.array(left_y_list), np.array(right_x_list), np.array(right_y_list)
-
-
-if __name__ == '__main__':
-    # load wine data
-    # each sample has 13 features and 3 possible classes
-    wine = load_wine()
-    wine_x = wine['data']
-    wine_y = wine['target']
-
-    # shuffle the data randomly
-    random_idx = rd.sample([i for i in range(len(wine_x))], len(wine_x))
-    wine_x = wine_x[random_idx]
-    wine_y = wine_y[random_idx]
-
-    # split the data into training data set and testing data set
-    train_rate = 0.7
-    train_num = int(train_rate*len(wine_x))
-    train_x = wine_x[:train_num]
-    train_y = wine_y[:train_num]
-    test_x = wine_x[train_num:]
-    test_y = wine_y[train_num:]
-
-    # construct decision tree classifier and compare the performance of different maximal depth
-    acc_list = []
-    depth_list = [(i+1) for i in range(100)]
-    for depth in depth_list:
-        dt = DecisionTree(input_dim=13, class_num=3, maximal_depth=depth, minimal_samples=1)
-        dt.train(train_x, train_y)
-        acc = dt.evaluate(test_x, test_y)
-        acc_list.append(acc)
-    plt.plot(depth_list, acc_list, marker='^', color='lightgray')
-    plt.xlabel('Maximal Depth')
-    plt.ylabel('Accuracy')
-    plt.title('Performance of different maximal length')
-    plt.show()
-
-    # construct decision tree classifier and compare the performance of different minimal samples
-    acc_list = []
-    sample_num_list = [(i+1) for i in range(100)]
-    for sample_num in sample_num_list:
-        dt = DecisionTree(input_dim=13, class_num=3, maximal_depth=100, minimal_samples=sample_num, criterion='entropy')
-        dt.train(train_x, train_y)
-        acc = dt.evaluate(test_x, test_y)
-        acc_list.append(acc)
-    plt.plot(sample_num_list, acc_list, marker='^', color='lightgray')
-    plt.xlabel('Minimal Samples Number')
-    plt.ylabel('Accuracy')
-    plt.title('Performance of different minimal samples number')
-    plt.show()
