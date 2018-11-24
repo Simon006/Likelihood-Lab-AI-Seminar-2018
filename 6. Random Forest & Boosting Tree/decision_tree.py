@@ -27,7 +27,7 @@ class Node:
 
 
 class DecisionTree:
-    def __init__(self, input_dim, class_num, maximal_depth=1000, minimal_samples=1, criterion='gini'):
+    def __init__(self, input_dim, maximal_depth=1000, minimal_samples=1, criterion='gini'):
         # classifier information
         self._input_dim = input_dim
         self._maximal_depth = maximal_depth
