@@ -5,11 +5,8 @@ XingYu
 
 
 import numpy as np
-import random as rd
-import matplotlib.pyplot as plt
 from math import log
 from collections import Counter
-from sklearn.datasets import load_wine
 
 
 class Node:
