@@ -38,9 +38,26 @@ class BoostingTree:
             error = 1 - weak_learner.evaluate(x_sampled, y_sampled)
             weak_learner['weight'] = 0.5 * log((1 - error) / error)
 
+            # update the sample weights
+            ...
+
+            # discard the weak learners
+            if error < 0.5:
+                self._weak_trees.append(weak_learner)
+            else:
+                continue
 
     def predict(self, x):
-        pass
+        for tree in self._weak_trees:
+            tree['model'].predict(x)
 
     def evaluate(self, x, y):
-        pass
+        y_predict = self.predict(x)
+        correct_num = 0
+        for i in range(len(y)):
+            if y[i] == y_predict[i]:
+                correct_num += 1
+            else:
+                continue
+        accuracy = correct_num / len(y)
+        return accuracy
