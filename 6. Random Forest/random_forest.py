@@ -19,16 +19,21 @@ class RandomForest:
         self._forest = self._construct_forest()
 
     def train(self, x, y):
+        # each tree is trained independently
         for tree in self._forest:
+            # sample the training data with replacement (row sampling)
             sample_index_list = [rd.randrange(len(x)) for i in range(len(x))]
             x_sampled = x[sample_index_list]
             y_sampled = y[sample_index_list]
+
+            # trained on the sampled data(both row sampled and column sampled)
             tree['model'].train(x_sampled[:,tree['feature']], y_sampled)
 
     def predict(self, x):
-        # each tree evaluates the data set independently.
+        # each tree evaluates the data set independently
         y_vote = np.zeros((self._tree_num, len(x)))
         for index, tree in enumerate(self._forest):
+            # make inference on the sampled features
             y_vote[index] = tree['model'].predict(x[:,tree['feature']])
 
         # majority voting
