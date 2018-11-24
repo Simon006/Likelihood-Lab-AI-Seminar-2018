@@ -29,7 +29,7 @@ class BoostingTree:
                                                  minimal_samples=self._minimal_samples, criterion=self._criterion)
 
             # sample(with replacement) training data-set with respect to sample_weights
-            sample_index = np.zeros(len(x))
+            sample_index = np.zeros(len(x), dtype=np.int)
             for counter in range(len(x)):
                 pointer = rd.uniform(0, 1)
                 accumulated_prob = 0
@@ -42,20 +42,25 @@ class BoostingTree:
             x_sampled, y_sampled = x[sample_index], y[sample_index]
 
             # train the weak learner
-            weak_learner.train(x_sampled, y_sampled)
+            weak_learner['model'].train(x_sampled, y_sampled)
 
             # calculate the weak learner's weight
-            acc, error, correct_samples_index, mistake_samples_index = weak_learner.evaluate(x_sampled, y_sampled)
-            weak_learner['weight'] = 0.5 * log((1 - error) / error)
+            _, error, correct_index, mistake_index = weak_learner['model'].evaluate(x_sampled, y_sampled)
+            if error == 0:
+                weak_learner['weight'] = 0.5 * log(1000)
+            elif error == 1:
+                weak_learner['weight'] = 0.5 * log(0.001)
+            else:
+                weak_learner['weight'] = 0.5 * log((1 - error) / error)
 
             # update the sample weights
             # step1: increase the weights of mistaken samples;
             # step2: decrease the weights of correct samples;
             # step3: normalize the distribution
-            for i in correct_samples_index:
+            for i in correct_index:
                 sample_weights[sample_index[i]] * exp(-weak_learner['weight'])
 
-            for i in mistake_samples_index:
+            for i in mistake_index:
                 sample_weights[sample_index[i]] * exp(weak_learner['weight'])
 
             sample_weights = sample_weights / sum(sample_weights)
@@ -119,10 +124,11 @@ if __name__ == '__main__':
     test_y = wine_y[train_num:]
 
     # compare the performances of random forest and decision tree
-    bt = BoostingTree(input_dim=len(train_x[0]), tree_num=100, maximal_depth=2, minimal_samples=5, criterion='gini')
+    bt = BoostingTree(input_dim=len(train_x[0]), tree_num=100, maximal_depth=2, minimal_samples=10, criterion='gini')
     dt = DecisionTree(input_dim=len(train_x[0]), maximal_depth=10, minimal_samples=5, criterion='gini')
     bt.train(train_x, train_y)
     dt.train(train_x, train_y)
-    print('Boosting Tree Accuracy: ' + str(bt.evaluate(test_x, test_y)))
-    print('Decision Tree Accuracy: ' + str(dt.evaluate(test_x, test_y)))
-
+    acc_bt = bt.evaluate(test_x, test_y)
+    acc_dt, _, _, _ = dt.evaluate(test_x, test_y)
+    print('Boosting Tree Accuracy: ' + str(acc_bt))
+    print('Decision Tree Accuracy: ' + str(acc_dt))
