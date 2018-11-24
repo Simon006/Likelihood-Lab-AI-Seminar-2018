@@ -49,7 +49,7 @@ class BoostingTree:
             if error > 0.5:  # discard the model if its performance is too bad
                 break
             elif error == 0:
-                weak_learner['weight'] = 0.5 * log(0.99/0.01)
+                weak_learner['weight'] = 0.5 * log(0.999/0.001)
             else:
                 weak_learner['weight'] = 0.5 * log((1 - error) / error)
 

@@ -18,16 +18,16 @@ if __name__ == '__main__':
     wine_y = wine_y[random_idx]
 
     # split the data into training data set and testing data set
-    train_rate = 0.3
+    train_rate = 0.7
     train_num = int(train_rate*len(wine_x))
     train_x = wine_x[:train_num]
     train_y = wine_y[:train_num]
     test_x = wine_x[train_num:]
     test_y = wine_y[train_num:]
 
-    # compare the performances of random forest and decision tree
-    rf = RandomForest(input_dim=len(train_x[0]), tree_num=200, maximal_depth=2, minimal_samples=10, criterion='gini')
-    bt = BoostingTree(input_dim=len(train_x[0]), tree_num=200, maximal_depth=2, minimal_samples=10, criterion='gini')
+    # compare the performances of random forest, boosting tree and decision tree
+    rf = RandomForest(input_dim=len(train_x[0]), tree_num=100, maximal_depth=2, minimal_samples=10, criterion='gini')
+    bt = BoostingTree(input_dim=len(train_x[0]), tree_num=100, maximal_depth=2, minimal_samples=10, criterion='gini')
     dt = DecisionTree(input_dim=len(train_x[0]), maximal_depth=10, minimal_samples=5, criterion='gini')
     rf.train(train_x, train_y)
     bt.train(train_x, train_y)
