@@ -33,10 +33,11 @@ class BoostingTree:
             for counter in range(len(x)):
                 pointer = rd.uniform(0, 1)
                 accumulated_prob = 0
-                for index, w in enumerate(sample_weights):
-                    accumulated_prob += w
+                for index in range(len(sample_weights)):
+                    accumulated_prob += sample_weights[index]
                     if pointer <= accumulated_prob:
                         sample_index[counter] = index
+                        break
                     else:
                         continue
             x_sampled, y_sampled = x[sample_index], y[sample_index]
@@ -46,12 +47,15 @@ class BoostingTree:
 
             # calculate the weak learner's weight
             _, error, correct_index, mistake_index = weak_learner['model'].evaluate(x_sampled, y_sampled)
-            if error == 0:
-                weak_learner['weight'] = 0.5 * log(1000)
-            elif error == 1:
-                weak_learner['weight'] = 0.5 * log(0.001)
+            if error > 0.5:  # discard the model if its performance is too bad
+                break
+            elif error == 0:
+                weak_learner['weight'] = 0.5 * log(0.99/0.01)
             else:
                 weak_learner['weight'] = 0.5 * log((1 - error) / error)
+
+            # stores the tree if its performance is acceptable
+            self._weak_trees.append(weak_learner)
 
             # update the sample weights
             # step1: increase the weights of mistaken samples;
@@ -59,17 +63,9 @@ class BoostingTree:
             # step3: normalize the distribution
             for i in correct_index:
                 sample_weights[sample_index[i]] * exp(-weak_learner['weight'])
-
             for i in mistake_index:
                 sample_weights[sample_index[i]] * exp(weak_learner['weight'])
-
             sample_weights = sample_weights / sum(sample_weights)
-
-            # discard the weak learners
-            if error < 0.5:
-                self._weak_trees.append(weak_learner)
-            else:
-                continue
 
     def predict(self, x):
         # each tree conducts the inference process independently
@@ -116,7 +112,7 @@ if __name__ == '__main__':
     wine_y = wine_y[random_idx]
 
     # split the data into training data set and testing data set
-    train_rate = 0.4
+    train_rate = 0.3
     train_num = int(train_rate*len(wine_x))
     train_x = wine_x[:train_num]
     train_y = wine_y[:train_num]
@@ -124,7 +120,7 @@ if __name__ == '__main__':
     test_y = wine_y[train_num:]
 
     # compare the performances of random forest and decision tree
-    bt = BoostingTree(input_dim=len(train_x[0]), tree_num=100, maximal_depth=2, minimal_samples=10, criterion='gini')
+    bt = BoostingTree(input_dim=len(train_x[0]), tree_num=200, maximal_depth=2, minimal_samples=10, criterion='gini')
     dt = DecisionTree(input_dim=len(train_x[0]), maximal_depth=10, minimal_samples=5, criterion='gini')
     bt.train(train_x, train_y)
     dt.train(train_x, train_y)
