@@ -1,12 +1,12 @@
 import numpy as np
 import random as rd
 from math import sqrt
-import multiprocessing as mp
+from sklearn.datasets import load_wine
 from decision_tree import DecisionTree
 
 
 class RandomForest:
-    def __init__(self, input_dim, tree_num, maximal_depth=1000, minimal_samples=1, criterion='gini', cores_num=-1):
+    def __init__(self, input_dim, tree_num, maximal_depth, minimal_samples, criterion):
         # basic classifier information
         self._forest_input_dim = input_dim
         self._tree_input_dim = int(sqrt(input_dim))
@@ -14,24 +14,22 @@ class RandomForest:
         self._maximal_depth = maximal_depth
         self._minimal_samples = minimal_samples
         self._criterion = criterion
-        if cores_num == -1:
-            self._cores_num = mp.cpu_count()
-        else:
-            self._cores_num = cores_num
 
         # build forest
         self._forest = self._construct_forest()
 
     def train(self, x, y):
-        pool = mp.Pool(processes=self._cores_num)
-        pool.map(func=_train_forest_mp, iterable=[(self._forest, x, y)] * self._cores_num)
+        for tree in self._forest:
+            sample_index_list = [rd.randrange(len(x)) for i in range(len(x))]
+            x_sampled = x[sample_index_list]
+            y_sampled = y[sample_index_list]
+            tree['model'].train(x_sampled[:,tree['feature']], y_sampled)
 
     def predict(self, x):
         # each tree evaluates the data set independently.
         y_vote = np.zeros((self._tree_num, len(x)))
-        un_voted_list = [True] * self._tree_num
-        pool = mp.Pool(processes=self._cores_num)
-        pool.map(func=_predict_forest_mp, iterable=[self._forest, x, un_voted_list, y_vote] * self._cores_num)
+        for index, tree in enumerate(self._forest):
+            y_vote[index] = tree['model'].predict(x[:,tree['feature']])
 
         # majority voting
         y_predicted = np.zeros(len(x))
@@ -59,7 +57,6 @@ class RandomForest:
             tree['model'] = DecisionTree(self._tree_input_dim, self._maximal_depth,
                                          self._minimal_samples, self._criterion)
             tree['feature'] = self._feature_bagging()
-            tree['untrained'] = True
             forest.append(tree)
         return forest
 
@@ -80,32 +77,30 @@ class RandomForest:
         return feature_mask
 
 
-def _train_forest_mp(forest, train_x, train_y):
-    for i in range(len(forest)):
-        if forest[i]['untrained']:
-            forest[i]['untrained'] = False
-            train_x_sampled, train_y_sampled = _sample_with_replacement(train_x, train_y)
-            forest[i]['model'].train(train_x_sampled[:,forest[i]['feature']], train_y_sampled)
-        else:
-            continue
+if __name__ == '__main__':
+    # load wine data
+    # each sample has 13 features and 3 possible classes
+    wine = load_wine()
+    wine_x = wine['data']
+    wine_y = wine['target']
 
+    # shuffle the data randomly
+    random_idx = rd.sample([i for i in range(len(wine_x))], len(wine_x))
+    wine_x = wine_x[random_idx]
+    wine_y = wine_y[random_idx]
 
-def _predict_forest_mp(forest, x, un_voted_list, y_vote):
-    for i in range(len(forest)):
-        if un_voted_list[i]:
-            un_voted_list[i] = False
-            y_vote[i] = forest[i]['model'].predict(x[:,forest[i]['feature']])
-        else:
-            continue
+    # split the data into training data set and testing data set
+    train_rate = 0.4
+    train_num = int(train_rate*len(wine_x))
+    train_x = wine_x[:train_num]
+    train_y = wine_y[:train_num]
+    test_x = wine_x[train_num:]
+    test_y = wine_y[train_num:]
 
-def _sample_with_replacement(x, y):
-    # check dimensionality
-    if len(x) != len(y):
-        raise ValueError('error.')
-
-    # bootstrap sample
-    sample_index_list = [rd.randrange(len(x)) for i in range(len(x))]
-    x_sampled = x[sample_index_list]
-    y_sampled = y[sample_index_list]
-
-    return x_sampled, y_sampled
+    # compare the performances of random forest and decision tree
+    rf = RandomForest(input_dim=len(train_x[0]), tree_num=100, maximal_depth=2, minimal_samples=5, criterion='gini')
+    dt = DecisionTree(input_dim=len(train_x[0]), maximal_depth=10, minimal_samples=5, criterion='gini')
+    rf.train(train_x, train_y)
+    dt.train(train_x, train_y)
+    print('Random Forest Accuracy: ' + str(rf.evaluate(test_x, test_y)))
+    print('Decision Tree Accuracy: ' + str(dt.evaluate(test_x, test_y)))
