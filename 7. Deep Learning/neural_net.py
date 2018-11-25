@@ -11,10 +11,10 @@ class NeuralNetwork:
         # construct network
         self._network = self._initialize_network()
 
-    def train(self,x ,y):
+    def train(self,x ,y):  # backward propagation
         pass
 
-    def predict(self, x):
+    def predict(self, x):  # forward propagation
         y_predict = np.zeros((len(x), self._output_dim))
         for index, sample in enumerate(x):
             temp = sample
