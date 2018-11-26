@@ -1,4 +1,5 @@
 import numpy as np
+from math import exp
 
 
 class NeuralNetwork:
@@ -26,7 +27,9 @@ class NeuralNetwork:
 
     def evaluate(self, x, y):
         y_predict = self.predict(x)
-        return
+        y_difference = y_predict - y
+        mse = np.average([np.dot(row, row) for row in y_difference])
+        return mse
 
     def _initialize_network(self):
         # check mistake
@@ -37,17 +40,34 @@ class NeuralNetwork:
         for index, neuron_num in enumerate(self._neuron_num_list):
             layer = dict()
             if index == 0:
-                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._input_dim))
-                layer['bias'] = np.random.normal(loc=0, scale=0.01, size=neuron_num)
+                layer['weight'] = np.random.normal(loc=0,
+                                                   scale=0.01,
+                                                   size=(neuron_num, self._input_dim))
+                layer['bias'] = np.random.normal(loc=0,
+                                                 scale=0.01,
+                                                 size=neuron_num)
             else:
-                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._neuron_num_list[index-1]))
-                layer['bias'] = np.random.normal(loc=0, scale=0.01, size=neuron_num)
+                layer['weight'] = np.random.normal(loc=0,
+                                                   scale=0.01,
+                                                   size=(neuron_num, self._neuron_num_list[index-1]))
+                layer['bias'] = np.random.normal(loc=0,
+                                                 scale=0.01,
+                                                 size=neuron_num)
 
             network.append(layer)
 
         return network
 
 
-def _sigmoid_activation(x):
+def _sigmoid_activation(vector):
+    result = np.zeros(len(vector))
+    for index, value in enumerate(vector):
+        result[index] = 1 / (1 + exp(-value))
+    return result
 
-    return
+
+if __name__ == '__main__':
+    # forward propagation test
+    nn = NeuralNetwork(5, 2, [3, 2, 2])
+    vector = np.array([[1, 0, 1, 0, 1]])
+    print(nn.predict(vector))
