@@ -38,10 +38,10 @@ class NeuralNetwork:
             layer = dict()
             if index == 0:
                 layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._input_dim))
-                layer['bias'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num))
+                layer['bias'] = np.random.normal(loc=0, scale=0.01, size=neuron_num)
             else:
                 layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._neuron_num_list[index-1]))
-                layer['bias'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num))
+                layer['bias'] = np.random.normal(loc=0, scale=0.01, size=neuron_num)
 
             network.append(layer)
 
