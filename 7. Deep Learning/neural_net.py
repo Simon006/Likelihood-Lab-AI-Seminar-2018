@@ -3,11 +3,12 @@ from math import exp
 
 
 class NeuralNetwork:
-    def __init__(self, input_dim, output_dim, neuron_num_list):
+    def __init__(self, input_dim, output_dim, neuron_num_list, learning_rate):
         # basic neural net information
         self._input_dim = input_dim
         self._output_dim = output_dim
         self._neuron_num_list = neuron_num_list
+        self._learning_rate = learning_rate
 
         # construct network
         self._network = self._initialize_network()
@@ -53,7 +54,6 @@ class NeuralNetwork:
                 layer['bias'] = np.random.normal(loc=0,
                                                  scale=0.01,
                                                  size=neuron_num)
-
             network.append(layer)
 
         return network
