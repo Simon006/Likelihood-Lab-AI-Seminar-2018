@@ -70,4 +70,6 @@ if __name__ == '__main__':
     # forward propagation test
     nn = NeuralNetwork(5, 2, [3, 2, 2])
     vector = np.array([[1, 0, 1, 0, 1]])
+    answer = np.array([[0.5, 0.5]])
     print(nn.predict(vector))
+    print(nn.evaluate(vector, answer))
