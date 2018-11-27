@@ -32,8 +32,12 @@ class NeuralNetwork:
 
                 # backward propagation
                 for backward_step in reversed(range(len(self._network)-1)):
-                    self._network['weight'][backward_step] = self._network['weight'][backward_step] + self._learning_rate
-                    self._network['bias'][backward_step] = self._network['bias'][backward_step] + self._learning_rate
+                    self._network['weight'][backward_step] = self._network['weight'][backward_step] \
+                                                             + self._learning_rate * \
+                                                             input_output_record[backward_step]['input']
+                    self._network['bias'][backward_step] = self._network['bias'][backward_step] \
+                                                           + self._learning_rate * \
+                                                           np.ones(len(self._network['bias'][backward_step]))
 
     def predict(self, x):  # forward propagation
         y_predict = np.zeros((len(x), self._output_dim))
