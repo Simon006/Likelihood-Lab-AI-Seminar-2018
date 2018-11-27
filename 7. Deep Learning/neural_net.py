@@ -13,17 +13,32 @@ class NeuralNetwork:
         # construct network
         self._network = self._initialize_network()
 
-    def train(self,x ,y):  # backward propagation
-        pass
+    def train(self,x ,y):
+        # minimize the loss function in each training sample through SGD
+        for i in range(len(x)):
+            input_output_record = []
+            tensor = x[i]
+            # forward propagation
+            for forward_step in range(len(self._network)):
+                input_output_record[forward_step] = dict()
+                input_output_record[forward_step]['input'] = tensor
+                tensor = np.dot(self._network[i]['weight'], tensor) + self._network[i]['bias']
+                tensor = _sigmoid_activation(tensor)
+                input_output_record[forward_step]['output'] = tensor
+
+            # backward propagation
+            for backward_step in reversed(range(len(self._network)-1)):
+                self._network['weight'][backward_step] = self._network['weight'][backward_step] + self._learning_rate
+                self._network['bias'][backward_step] = self._network['bias'][backward_step] + self._learning_rate
 
     def predict(self, x):  # forward propagation
         y_predict = np.zeros((len(x), self._output_dim))
         for index, sample in enumerate(x):
-            temp = sample
+            tensor = sample
             for layer in self._network:
-                temp = np.dot(layer['weight'], temp) + layer['bias']
-                temp = _sigmoid_activation(temp)
-            y_predict[index] = temp
+                tensor = np.dot(layer['weight'], tensor) + layer['bias']
+                tensor = _sigmoid_activation(tensor)
+            y_predict[index] = tensor
         return y_predict
 
     def evaluate(self, x, y):
@@ -64,6 +79,10 @@ def _sigmoid_activation(vector):
     for index, value in enumerate(vector):
         result[index] = 1 / (1 + exp(-value))
     return result
+
+
+def _derivative_sigmoid_activation(vector):
+    return _sigmoid_activation(vector) - _sigmoid_activation(vector) * _sigmoid_activation(vector)
 
 
 if __name__ == '__main__':
