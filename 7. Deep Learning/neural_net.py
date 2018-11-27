@@ -19,6 +19,7 @@ class NeuralNetwork:
     def train(self,x ,y):
         for e in range(self._epoch):
             # minimize the loss function in each training sample through SGD
+            mse_sum = 0
             for i in range(len(x)):
                 input_output_record = []
                 tensor = x[i]
@@ -30,6 +31,9 @@ class NeuralNetwork:
                     tensor = _sigmoid_activation(tensor)
                     input_output_record[forward_step]['output'] = tensor
 
+                # calculate MSE
+
+
                 # backward propagation
                 for backward_step in reversed(range(len(self._network)-1)):
                     self._network['weight'][backward_step] = self._network['weight'][backward_step] \
@@ -38,6 +42,7 @@ class NeuralNetwork:
                     self._network['bias'][backward_step] = self._network['bias'][backward_step] \
                                                            + self._learning_rate * \
                                                            np.ones(len(self._network['bias'][backward_step]))
+            print('The average MSE of the {0} epoch is {1}'.format(str(e + 1), ))
 
     def predict(self, x):  # forward propagation
         y_predict = np.zeros((len(x), self._output_dim))
