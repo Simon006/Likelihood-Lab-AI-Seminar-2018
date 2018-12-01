@@ -27,7 +27,7 @@ class NeuralNetwork:
             for index, sample in enumerate(x):
                 input_output_record = []
                 # forward propagation
-                tensor = np.reshape(copy.deepcopy(sample), newshape=(len(sample), 1))
+                tensor = np.reshape(sample, newshape=(len(sample), 1))
                 for forward_step in range(len(self._network)):
                     input_output_record.append(dict())
 
@@ -40,12 +40,11 @@ class NeuralNetwork:
                     tensor = self._activation(index=forward_step, vector=tensor)
 
                 # add Square error in this sample
-                y_difference = np.reshape(copy.deepcopy(tensor), newshape=(1, len(tensor)))[0] - y[index]
+                y_difference = np.reshape(tensor, newshape=(1, len(tensor)))[0] - y[index]
                 square_error_sum += np.dot(y_difference, y_difference)
 
                 # backward propagation
                 previous_result = np.reshape(y_difference, (len(y_difference), 1)) * self._d_activation(-1, input_output_record[-1]['linear_output'])
-
                 for backward_step in reversed(range(len(self._network))):
 
                     partial_ok_wk = np.reshape(input_output_record[backward_step]['input'], (1, len(input_output_record[backward_step]['input'])))
@@ -55,8 +54,10 @@ class NeuralNetwork:
                     # Stochastic Gradient Descent
                     self._network[backward_step]['weight'] -= self._learning_rate * np.dot(previous_result ,partial_ok_wk)
                     self._network[backward_step]['bias'] -= self._learning_rate * previous_result
+
                     if backward_step > 0:
                         previous_result = np.transpose(np.dot(np.transpose(previous_result), partial_ok_ik)) * partial_ik_o_k_minus_one
+                        print(previous_result)
 
             # print the error in this training epoch
             mse = square_error_sum / len(x)
@@ -145,7 +146,6 @@ class NeuralNetwork:
             result = _derivative_sigmoid(vector)
         else:
             raise ValueError
-
         return result
 
 
@@ -165,7 +165,7 @@ def _derivative_sigmoid(vector):
         raise ValueError('activation function can only be applied to column vector.')
 
     temp = copy.deepcopy(vector)
-    result = _sigmoid(temp) - _sigmoid(temp) * _sigmoid(temp)
+    result = _sigmoid(temp) * (1 - _sigmoid(temp))
     return result
 
 
@@ -211,7 +211,7 @@ if __name__ == '__main__':
             breast_cancer_x[i][j] = (breast_cancer_x[i][j] - min_value) / (max_value - min_value)
 
     # split the data into training data set and testing data set
-    train_rate = 0.8
+    train_rate = 0.9
     train_num = int(train_rate*len(breast_cancer_x))
     train_x = breast_cancer_x[:train_num]
     train_y = breast_cancer_y[:train_num]
@@ -220,8 +220,8 @@ if __name__ == '__main__':
 
     # train neural net to predict
     dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=len(train_y[0]),
-                        neuron_list=[5, 3, 2, 1], activation_list=['relu', 'relu', 'relu', 'sigmoid'],
-                        learning_rate=0.1, epoch=100)
+                        neuron_list=[5, 1], activation_list=['relu', 'sigmoid'],
+                        learning_rate=0.1, epoch=10)
     dnn.train(x=train_x, y=train_y)
     accuracy = dnn.evaluate(x=test_x, y=test_y)
     print('Accuracy: ' + str(accuracy))
