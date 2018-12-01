@@ -20,13 +20,14 @@ class NeuralNetwork:
     def train(self,x ,y):
         for e in range(self._epoch):
             square_error_sum = 0
-            # minimize the loss function in each training sample by gradient descend
-            # the loss function is defined as the
+            # minimize the loss function in each training sample by gradient descent
+            # the loss function is defined as half of the square error between prediction and label
             for index, tensor in enumerate(x):
                 input_output_record = []
                 # forward propagation
+                tensor = np.reshape(tensor, newshape=(len(tensor), 1))
                 for forward_step in range(len(self._network)):
-                    input_output_record[forward_step] = dict()
+                    input_output_record.append(dict())
 
                     # conduct linear transformation and record the input and linear output
                     input_output_record[forward_step]['input'] = tensor
@@ -34,24 +35,29 @@ class NeuralNetwork:
                     input_output_record[forward_step]['linear_output'] = tensor
 
                     # non-linear transformation
-                    if self._network[forward_step]['activation'] == 'relu':
-                        tensor = _rectified_linear_unit(tensor)
-                    elif self._network[forward_step]['activation'] == 'sigmoid':
-                        tensor = _sigmoid(tensor)
-                    else:
-                        raise ValueError
+                    tensor = self._activation(index=forward_step, vector=tensor)
 
                 # add Square error in this sample
-                square_error_sum += sum(np.dot(tensor - y[index], tensor - y[index]))
+                y_difference = np.reshape(tensor, newshape=(1, len(tensor)))[0] - y[index]
+                square_error_sum += np.dot(y_difference, y_difference)
 
                 # backward propagation
-                for backward_step in reversed(range(len(self._network)-1)):
-                    self._network['weight'][backward_step] = self._network['weight'][backward_step] \
-                                                             + self._learning_rate * \
-                                                             input_output_record[backward_step]['input']
-                    self._network['bias'][backward_step] = self._network['bias'][backward_step] \
-                                                           + self._learning_rate * \
-                                                           np.ones(len(self._network['bias'][backward_step]))
+                previous_result = np.reshape(y_difference, (len(y_difference), 1)) * self._d_activation(-1, input_output_record[-1]['linear_output'])
+                for backward_step in reversed(range(len(self._network))):
+                    partial_ok_wk = np.reshape(input_output_record[backward_step]['input'], (1, len(input_output_record[backward_step]['input'])))
+                    partial_ok_ik = self._network[backward_step]['weight']
+                    partial_ik_o_k_minus_one = self._d_activation(backward_step-1, input_output_record[backward_step-1]['linear_output'])
+
+                    # Stochastic Gradient Descent
+                    self._network[backward_step]['weight'] = self._network[backward_step]['weight'] - \
+                                                             self._learning_rate * \
+                                                             np.dot(previous_result ,partial_ok_wk)
+                    self._network[backward_step]['bias'] = self._network[backward_step]['bias'] - \
+                                                           self._learning_rate * \
+                                                           previous_result
+                    if backward_step > 0:
+                        previous_result = np.transpose(np.dot(np.transpose(previous_result), partial_ok_ik)) * \
+                                          partial_ik_o_k_minus_one
 
             # print the error in this training epoch
             mse = square_error_sum / len(x)
@@ -60,29 +66,29 @@ class NeuralNetwork:
     def predict(self, x):
         y_predict = np.zeros((len(x), self._output_dim))
         for index, sample in enumerate(x):
-            tensor = sample
-
+            tensor = np.reshape(sample, newshape=(len(sample),1))
             # forward propagation
-            for layer in self._network:
+            for index, layer in enumerate(self._network):
                 # linear transformation
                 tensor = np.dot(layer['weight'], tensor) + layer['bias']
 
                 # non-linear transformation
-                if layer['activation'] == 'relu':
-                    tensor = _rectified_linear_unit(tensor)
-                elif layer['activation'] == 'sigmoid':
-                    tensor = _sigmoid(tensor)
-                else:
-                    raise ValueError
+                tensor = self._activation(index=index, vector=tensor)
 
-            y_predict[index] = tensor
+            y_predict[index] = np.reshape(tensor, newshape=(1, len(tensor)))[0]
         return y_predict
 
     def evaluate(self, x, y):
         y_predict = self.predict(x)
-        y_difference = y_predict - y
-        mean_square_error = np.average([np.dot(row, row) for row in y_difference])
-        return mean_square_error
+        correct_num = 0
+        for index, row in enumerate(y_predict):
+            true_label = np.argmax(y[index])
+            predict_label = np.argmax(row)
+            if true_label == predict_label:
+                correct_num += 1
+            else:
+                continue
+        return correct_num / len(x)
 
     def _initialize_network(self):
         # check mistake
@@ -99,12 +105,12 @@ class NeuralNetwork:
         # initialize the network's layer
         network = []
         for index, neuron_num in enumerate(self._neuron_list):
-            layer = dict
+            layer = dict()
             # define layer weight and bias
             if index == 0:
-                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._input_dim + 1))
+                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._input_dim))
             else:
-                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._neuron_list[index-1] + 1))
+                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._neuron_list[index-1]))
             layer['bias'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, 1))
 
             # define the activation function(you have two options: rectified linear unit or sigmoid)
@@ -117,24 +123,62 @@ class NeuralNetwork:
 
         return network
 
+    def _activation(self, index, vector):
+        if vector.shape[1] != 1:
+            raise ValueError('activation function can only be applied to column vector.')
+
+        if self._network[index]['activation'] == 'relu':
+            vector = _rectified_linear_unit(vector)
+        elif self._network[index]['activation'] == 'sigmoid':
+            vector = _sigmoid(vector)
+        else:
+            raise ValueError
+
+        return vector
+
+    def _d_activation(self, index, vector):
+        if vector.shape[1] != 1:
+            raise ValueError('activation function can only be applied to column vector.')
+
+        if self._network[index]['activation'] == 'relu':
+            vector = _derivative_rectified_linear_unit(vector)
+        elif self._network[index]['activation'] == 'sigmoid':
+            vector = _derivative_sigmoid(vector)
+        else:
+            raise ValueError
+
+        return vector
+
 
 def _sigmoid(vector):
-    result = np.zeros(len(vector))
+    if vector.shape[1] != 1:
+        raise ValueError('activation function can only be applied to column vector.')
+
+    result = np.zeros((len(vector), 1))
     for index, value in enumerate(vector):
-        result[index] = 1 / (1 + exp(-value))
+        result[index][0] = 1 / (1 + exp(-value[0]))
     return result
 
 
 def _derivative_sigmoid(vector):
+    if vector.shape[1] != 1:
+        raise ValueError('activation function can only be applied to column vector.')
+
     return _sigmoid(vector) - _sigmoid(vector) * _sigmoid(vector)
 
 
 def _rectified_linear_unit(vector):
+    if vector.shape[1] != 1:
+        raise ValueError('activation function can only be applied to column vector.')
+
     vector[vector < 0] = 0
     return vector
 
 
 def _derivative_rectified_linear_unit(vector):
+    if vector.shape[1] != 1:
+        raise ValueError('activation function can only be applied to column vector.')
+
     vector[vector < 0] = 0
     vector[vector > 0] = 1
     return vector
@@ -166,7 +210,7 @@ if __name__ == '__main__':
     wine_y = num_2_one_hot(wine_y)
 
     # split the data into training data set and testing data set
-    train_rate = 0.7
+    train_rate = 0.9
     train_num = int(train_rate*len(wine_x))
     train_x = wine_x[:train_num]
     train_y = wine_y[:train_num]
@@ -176,7 +220,7 @@ if __name__ == '__main__':
     # train neural net to predict
     dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=len(train_y[0]),
                         neuron_list=[15, 10, 5, len(train_y[0])], activation_list=['relu', 'relu', 'relu', 'sigmoid'],
-                        learning_rate=0.1, epoch=20)
+                        learning_rate=0.05, epoch=1000)
     dnn.train(x=train_x, y=train_y)
     mse = dnn.evaluate(x=test_x, y=test_y)
-    print('Test MSE: ' + str(mse))
+    print('Test Accuracy: ' + str(mse))
