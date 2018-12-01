@@ -222,4 +222,4 @@ if __name__ == '__main__':
                         learning_rate=0.01, epoch=500)
     dnn.train(x=train_x, y=train_y)
     average_square_error = dnn.evaluate(x=test_x, y=test_y)
-    print('Average_Square_Error_On_Test: ' + str(average_square_error))
+    print('Mean Square Error On Test: ' + str(average_square_error))
