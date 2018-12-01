@@ -1,7 +1,7 @@
 import numpy as np
 from math import exp
 import random as rd
-from sklearn.datasets import load_wine
+from sklearn.datasets import load_breast_cancer
 
 
 class NeuralNetwork:
@@ -61,7 +61,7 @@ class NeuralNetwork:
 
             # print the error in this training epoch
             mse = square_error_sum / len(x)
-            print('------The MSE of the {0} epoch is {1}------'.format(str(e + 1), mse))
+            # print('------The MSE of the {0} epoch is {1}------'.format(str(e + 1), mse))
 
     def predict(self, x):
         y_predict = np.zeros((len(x), self._output_dim))
@@ -82,8 +82,11 @@ class NeuralNetwork:
         y_predict = self.predict(x)
         correct_num = 0
         for index, row in enumerate(y_predict):
-            true_label = np.argmax(y[index])
-            predict_label = np.argmax(row)
+            true_label = y[index]
+            predict_label = int(np.round(row[0]))
+            print('-------')
+            print(true_label)
+            print(predict_label)
             if true_label == predict_label:
                 correct_num += 1
             else:
@@ -108,10 +111,10 @@ class NeuralNetwork:
             layer = dict()
             # define layer weight and bias
             if index == 0:
-                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._input_dim))
+                layer['weight'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, self._input_dim))
             else:
-                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._neuron_list[index-1]))
-            layer['bias'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, 1))
+                layer['weight'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, self._neuron_list[index-1]))
+            layer['bias'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, 1))
 
             # define the activation function(you have two options: rectified linear unit or sigmoid)
             if self._activation_list[index] not in {'relu', 'sigmoid'}:
@@ -184,43 +187,28 @@ def _derivative_rectified_linear_unit(vector):
     return vector
 
 
-def num_2_one_hot(y):
-    one_hot_array = np.zeros((len(y), len(set(y))))
-    response_2_category = dict()
-    for index, response in enumerate(set(y)):
-        response_2_category[response] = index
-    for index, response in enumerate(y):
-        one_hot_array[index][response_2_category[response]] = 1
-    return one_hot_array
-
-
 if __name__ == '__main__':
-    # load wine data
-    # each sample has 13 features and 3 possible classes
-    wine = load_wine()
-    wine_x = wine['data']
-    wine_y = wine['target']
+    # load data
+    breast_cancer = load_breast_cancer()
+    breast_cancer_x = breast_cancer['data']
+    breast_cancer_y = breast_cancer['target']
 
     # shuffle the data randomly
-    random_idx = rd.sample([i for i in range(len(wine_x))], len(wine_x))
-    wine_x = wine_x[random_idx]
-    wine_y = wine_y[random_idx]
-
-    # convert label into one hot format
-    wine_y = num_2_one_hot(wine_y)
+    random_idx = rd.sample([i for i in range(len(breast_cancer_x))], len(breast_cancer_x))
+    breast_cancer_x = breast_cancer_x[random_idx]
+    breast_cancer_y = breast_cancer_y[random_idx]
 
     # split the data into training data set and testing data set
     train_rate = 0.9
-    train_num = int(train_rate*len(wine_x))
-    train_x = wine_x[:train_num]
-    train_y = wine_y[:train_num]
-    test_x = wine_x[train_num:]
-    test_y = wine_y[train_num:]
+    train_num = int(train_rate*len(breast_cancer_x))
+    train_x = breast_cancer_x[:train_num]
+    train_y = breast_cancer_y[:train_num]
+    test_x = breast_cancer_x[train_num:]
+    test_y = breast_cancer_y[train_num:]
 
     # train neural net to predict
-    dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=len(train_y[0]),
-                        neuron_list=[15, 10, 5, len(train_y[0])], activation_list=['relu', 'relu', 'relu', 'sigmoid'],
-                        learning_rate=0.05, epoch=1000)
+    dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=1, neuron_list=[15, 10, 5, 1],
+                        activation_list=['relu', 'relu', 'relu', 'sigmoid'], learning_rate=0.01, epoch=100)
     dnn.train(x=train_x, y=train_y)
-    mse = dnn.evaluate(x=test_x, y=test_y)
-    print('Test Accuracy: ' + str(mse))
+    accuracy = dnn.evaluate(x=test_x, y=test_y)
+    print('Accuracy: ' + str(accuracy))
