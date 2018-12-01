@@ -84,10 +84,9 @@ class NeuralNetwork:
         error = 0
         for index, row in enumerate(y_predict):
             y_difference = row - y[index]
-            print(y_difference)
             error += np.sqrt(np.dot(y_difference, y_difference))
-        average_square_error = error / len(x)
-        return average_square_error
+        average_error = error / len(x)
+        return average_error
 
     def _initialize_network(self):
         # check mistake
@@ -210,7 +209,7 @@ if __name__ == '__main__':
             breast_cancer_x[i][j] = (breast_cancer_x[i][j] - min_value) / (max_value - min_value)
 
     # split the data into training data set and testing data set
-    train_rate = 0.9
+    train_rate = 0.8
     train_num = int(train_rate*len(breast_cancer_x))
     train_x = breast_cancer_x[:train_num]
     train_y = breast_cancer_y[:train_num]
@@ -222,5 +221,5 @@ if __name__ == '__main__':
                         neuron_list=[5, 1], activation_list=['relu', 'sigmoid'],
                         learning_rate=0.1, epoch=100)
     dnn.train(x=train_x, y=train_y)
-    accuracy = dnn.evaluate(x=test_x, y=test_y)
-    print('Accuracy: ' + str(accuracy))
+    average_square_error = dnn.evaluate(x=test_x, y=test_y)
+    print('Average_Square_Error_On_Test: ' + str(average_square_error))
