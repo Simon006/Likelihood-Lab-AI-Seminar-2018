@@ -17,7 +17,7 @@ class NeuralNetwork:
         # construct network
         self._network = self._initialize_network()
 
-    def train(self,x ,y):
+    def train(self, x, y):
         for e in range(self._epoch):
             square_error_sum = 0
             # minimize the loss function in each training sample by gradient descent
@@ -52,8 +52,7 @@ class NeuralNetwork:
                     self._network[backward_step]['weight'] -= self._learning_rate * np.dot(previous_result ,partial_ok_wk)
                     self._network[backward_step]['bias'] -= self._learning_rate * previous_result
                     if backward_step > 0:
-                        previous_result = np.transpose(np.dot(np.transpose(previous_result), partial_ok_ik)) * \
-                                          partial_ik_o_k_minus_one
+                        previous_result = np.transpose(np.dot(np.transpose(previous_result), partial_ok_ik)) * partial_ik_o_k_minus_one
 
             # print the error in this training epoch
             mse = square_error_sum / len(x)
@@ -107,10 +106,10 @@ class NeuralNetwork:
             layer = dict()
             # define layer weight and bias
             if index == 0:
-                layer['weight'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, self._input_dim))
+                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._input_dim))
             else:
-                layer['weight'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, self._neuron_list[index-1]))
-            layer['bias'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, 1))
+                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._neuron_list[index-1]))
+            layer['bias'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, 1))
 
             # define the activation function(you have two options: rectified linear unit or sigmoid)
             if self._activation_list[index] not in {'relu', 'sigmoid'}:
@@ -203,8 +202,8 @@ if __name__ == '__main__':
     test_y = breast_cancer_y[train_num:]
 
     # train neural net to predict
-    dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=1, neuron_list=[10, 5, 1],
-                        activation_list=['relu', 'relu', 'sigmoid'], learning_rate=0.1, epoch=100)
+    dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=1, neuron_list=[10, 3, 1],
+                        activation_list=['sigmoid', 'sigmoid', 'sigmoid'], learning_rate=0.01, epoch=30)
     dnn.train(x=train_x, y=train_y)
     accuracy = dnn.evaluate(x=test_x, y=test_y)
     print('Accuracy: ' + str(accuracy))
