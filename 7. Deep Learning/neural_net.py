@@ -41,6 +41,7 @@ class NeuralNetwork:
 
                 # add Square error in this sample
                 y_difference = np.reshape(tensor, newshape=(1, len(tensor)))[0] - y[index]
+                # print(y_difference)
                 square_error_sum += np.dot(y_difference, y_difference)
 
                 # backward propagation
@@ -57,16 +58,16 @@ class NeuralNetwork:
 
                     if backward_step > 0:
                         previous_result = np.transpose(np.dot(np.transpose(previous_result), partial_ok_ik)) * partial_ik_o_k_minus_one
-                        print(previous_result)
+                        # print(previous_result)
 
             # print the error in this training epoch
             mse = square_error_sum / len(x)
             print('------The MSE of the {0} epoch is {1}------'.format(str(e + 1), mse))
 
     def predict(self, x):
-        y_predict = np.zeros((len(x), self._output_dim))
+        y_predict = []
         for index, sample in enumerate(x):
-            tensor = np.reshape(copy.deepcopy(sample), newshape=(len(sample),1))
+            tensor = np.reshape(sample, newshape=(len(sample),1))
             # forward propagation
             for index, layer in enumerate(self._network):
                 # linear transformation
@@ -74,9 +75,9 @@ class NeuralNetwork:
 
                 # non-linear transformation
                 tensor = self._activation(index=index, vector=tensor)
+            y_predict.append(np.reshape(tensor, newshape=(1, len(tensor)))[0])
 
-            y_predict[index] = np.reshape(tensor, newshape=(1, len(tensor)))[0]
-        return y_predict
+        return np.array(y_predict)
 
     def evaluate(self, x, y):
         y_predict = self.predict(x)
@@ -221,7 +222,7 @@ if __name__ == '__main__':
     # train neural net to predict
     dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=len(train_y[0]),
                         neuron_list=[5, 1], activation_list=['relu', 'sigmoid'],
-                        learning_rate=0.1, epoch=10)
+                        learning_rate=0.01, epoch=100)
     dnn.train(x=train_x, y=train_y)
     accuracy = dnn.evaluate(x=test_x, y=test_y)
     print('Accuracy: ' + str(accuracy))
