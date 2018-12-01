@@ -1,6 +1,8 @@
+import copy
 import numpy as np
 from math import exp
 import random as rd
+from collections import Iterable
 from sklearn.datasets import load_breast_cancer
 
 
@@ -43,7 +45,9 @@ class NeuralNetwork:
 
                 # backward propagation
                 previous_result = np.reshape(y_difference, (len(y_difference), 1)) * self._d_activation(-1, input_output_record[-1]['linear_output'])
+
                 for backward_step in reversed(range(len(self._network))):
+
                     partial_ok_wk = np.reshape(input_output_record[backward_step]['input'], (1, len(input_output_record[backward_step]['input'])))
                     partial_ok_ik = self._network[backward_step]['weight']
                     partial_ik_o_k_minus_one = self._d_activation(backward_step-1, input_output_record[backward_step-1]['linear_output'])
@@ -79,9 +83,6 @@ class NeuralNetwork:
         for index, row in enumerate(y_predict):
             true_label = y[index]
             predict_label = int(np.round(row[0]))
-            print('-------')
-            print(true_label)
-            print(predict_label)
             if true_label == predict_label:
                 correct_num += 1
             else:
@@ -126,26 +127,26 @@ class NeuralNetwork:
             raise ValueError('activation function can only be applied to column vector.')
 
         if self._network[index]['activation'] == 'relu':
-            vector = _rectified_linear_unit(vector)
+            result = _rectified_linear_unit(vector)
         elif self._network[index]['activation'] == 'sigmoid':
-            vector = _sigmoid(vector)
+            result = _sigmoid(vector)
         else:
             raise ValueError
 
-        return vector
+        return result
 
     def _d_activation(self, index, vector):
         if vector.shape[1] != 1:
             raise ValueError('activation function can only be applied to column vector.')
 
         if self._network[index]['activation'] == 'relu':
-            vector = _derivative_rectified_linear_unit(vector)
+            result = _derivative_rectified_linear_unit(vector)
         elif self._network[index]['activation'] == 'sigmoid':
-            vector = _derivative_sigmoid(vector)
+            result = _derivative_sigmoid(vector)
         else:
             raise ValueError
 
-        return vector
+        return result
 
 
 def _sigmoid(vector):
@@ -155,6 +156,7 @@ def _sigmoid(vector):
     result = np.zeros((len(vector), 1))
     for index, value in enumerate(vector):
         result[index][0] = 1 / (1 + exp(-value[0]))
+
     return result
 
 
@@ -162,24 +164,28 @@ def _derivative_sigmoid(vector):
     if vector.shape[1] != 1:
         raise ValueError('activation function can only be applied to column vector.')
 
-    return _sigmoid(vector) - _sigmoid(vector) * _sigmoid(vector)
+    temp = copy.deepcopy(vector)
+    result = _sigmoid(temp) - _sigmoid(temp) * _sigmoid(temp)
+    return result
 
 
 def _rectified_linear_unit(vector):
     if vector.shape[1] != 1:
         raise ValueError('activation function can only be applied to column vector.')
 
-    vector[vector < 0] = 0
-    return vector
+    result = copy.deepcopy(vector)
+    result[result < 0] = 0
+    return result
 
 
 def _derivative_rectified_linear_unit(vector):
     if vector.shape[1] != 1:
         raise ValueError('activation function can only be applied to column vector.')
 
-    vector[vector < 0] = 0
-    vector[vector > 0] = 1
-    return vector
+    result = copy.deepcopy(vector)
+    result[result < 0] = 0
+    result[result > 0] = 1
+    return result
 
 
 if __name__ == '__main__':
@@ -192,6 +198,17 @@ if __name__ == '__main__':
     random_idx = rd.sample([i for i in range(len(breast_cancer_x))], len(breast_cancer_x))
     breast_cancer_x = breast_cancer_x[random_idx]
     breast_cancer_y = breast_cancer_y[random_idx]
+    if isinstance(breast_cancer_y[0], Iterable):
+        pass
+    else:
+        breast_cancer_y = np.reshape(breast_cancer_y, newshape=(len(breast_cancer_y), 1))
+
+    # Normalize the data's column to [0,1]
+    for j in range(len(breast_cancer_x[0])):
+        min_value = min([breast_cancer_x[i][j] for i in range(len(breast_cancer_x))])
+        max_value = max([breast_cancer_x[i][j] for i in range(len(breast_cancer_x))])
+        for i in range(len(breast_cancer_x)):
+            breast_cancer_x[i][j] = (breast_cancer_x[i][j] - min_value) / (max_value - min_value)
 
     # split the data into training data set and testing data set
     train_rate = 0.8
@@ -202,8 +219,9 @@ if __name__ == '__main__':
     test_y = breast_cancer_y[train_num:]
 
     # train neural net to predict
-    dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=1, neuron_list=[10, 3, 1],
-                        activation_list=['sigmoid', 'sigmoid', 'sigmoid'], learning_rate=0.01, epoch=30)
+    dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=len(train_y[0]),
+                        neuron_list=[5, 3, 2, 1], activation_list=['relu', 'relu', 'relu', 'sigmoid'],
+                        learning_rate=0.01, epoch=50)
     dnn.train(x=train_x, y=train_y)
     accuracy = dnn.evaluate(x=test_x, y=test_y)
     print('Accuracy: ' + str(accuracy))
