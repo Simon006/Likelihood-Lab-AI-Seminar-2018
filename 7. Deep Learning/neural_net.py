@@ -24,23 +24,23 @@ class NeuralNetwork:
             square_error_sum = 0
             # minimize the loss function in each training sample by gradient descent
             # the loss function is defined as half of the square error between prediction and label
-            for index, tensor in enumerate(x):
+            for index, sample in enumerate(x):
                 input_output_record = []
                 # forward propagation
-                tensor = np.reshape(tensor, newshape=(len(tensor), 1))
+                tensor = np.reshape(copy.deepcopy(sample), newshape=(len(sample), 1))
                 for forward_step in range(len(self._network)):
                     input_output_record.append(dict())
 
                     # conduct linear transformation and record the input and linear output
-                    input_output_record[forward_step]['input'] = tensor
+                    input_output_record[forward_step]['input'] = copy.deepcopy(tensor)
                     tensor = np.dot(self._network[forward_step]['weight'], tensor) + self._network[forward_step]['bias']
-                    input_output_record[forward_step]['linear_output'] = tensor
+                    input_output_record[forward_step]['linear_output'] = copy.deepcopy(tensor)
 
                     # non-linear transformation
                     tensor = self._activation(index=forward_step, vector=tensor)
 
                 # add Square error in this sample
-                y_difference = np.reshape(tensor, newshape=(1, len(tensor)))[0] - y[index]
+                y_difference = np.reshape(copy.deepcopy(tensor), newshape=(1, len(tensor)))[0] - y[index]
                 square_error_sum += np.dot(y_difference, y_difference)
 
                 # backward propagation
@@ -65,7 +65,7 @@ class NeuralNetwork:
     def predict(self, x):
         y_predict = np.zeros((len(x), self._output_dim))
         for index, sample in enumerate(x):
-            tensor = np.reshape(sample, newshape=(len(sample),1))
+            tensor = np.reshape(copy.deepcopy(sample), newshape=(len(sample),1))
             # forward propagation
             for index, layer in enumerate(self._network):
                 # linear transformation
@@ -183,7 +183,7 @@ def _derivative_rectified_linear_unit(vector):
         raise ValueError('activation function can only be applied to column vector.')
 
     result = copy.deepcopy(vector)
-    result[result < 0] = 0
+    result[result <= 0] = 0
     result[result > 0] = 1
     return result
 
@@ -221,7 +221,7 @@ if __name__ == '__main__':
     # train neural net to predict
     dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=len(train_y[0]),
                         neuron_list=[5, 3, 2, 1], activation_list=['relu', 'relu', 'relu', 'sigmoid'],
-                        learning_rate=0.01, epoch=50)
+                        learning_rate=0.1, epoch=100)
     dnn.train(x=train_x, y=train_y)
     accuracy = dnn.evaluate(x=test_x, y=test_y)
     print('Accuracy: ' + str(accuracy))
