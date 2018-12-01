@@ -106,10 +106,10 @@ class NeuralNetwork:
             layer = dict()
             # define layer weight and bias
             if index == 0:
-                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._input_dim))
+                layer['weight'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, self._input_dim))
             else:
-                layer['weight'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, self._neuron_list[index-1]))
-            layer['bias'] = np.random.normal(loc=0, scale=0.01, size=(neuron_num, 1))
+                layer['weight'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, self._neuron_list[index-1]))
+            layer['bias'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, 1))
 
             # define the activation function(you have two options: rectified linear unit or sigmoid)
             if self._activation_list[index] not in {'relu', 'sigmoid'}:
@@ -219,7 +219,7 @@ if __name__ == '__main__':
     # train neural net to predict
     dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=len(train_y[0]),
                         neuron_list=[5, 1], activation_list=['relu', 'sigmoid'],
-                        learning_rate=0.1, epoch=100)
+                        learning_rate=0.1, epoch=200)
     dnn.train(x=train_x, y=train_y)
     average_square_error = dnn.evaluate(x=test_x, y=test_y)
     print('Average_Square_Error_On_Test: ' + str(average_square_error))
