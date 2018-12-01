@@ -61,7 +61,7 @@ class NeuralNetwork:
 
             # print the error in this training epoch
             mse = square_error_sum / len(x)
-            print('------The MSE of the {0} epoch is {1}------'.format(str(e + 1), mse))
+            print('>>>The MSE of the {0} epoch is {1}'.format(str(e + 1), np.round(mse, decimals=5)))
 
     def predict(self, x):
         y_predict = []
