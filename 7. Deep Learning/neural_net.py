@@ -39,26 +39,25 @@ class NeuralNetwork:
                     # non-linear transformation
                     tensor = self._activation(index=forward_step, vector=tensor)
 
-                # add Square error in this sample
+                # add square error in this sample
                 y_difference = np.reshape(tensor, newshape=(1, len(tensor)))[0] - y[index]
-                # print(y_difference)
-                square_error_sum += np.dot(y_difference, y_difference)
+                square_error_sum += np.sqrt(np.dot(y_difference, y_difference))
 
                 # backward propagation
                 previous_result = np.reshape(y_difference, (len(y_difference), 1)) * self._d_activation(-1, input_output_record[-1]['linear_output'])
                 for backward_step in reversed(range(len(self._network))):
-
+                    # calculate partial derivative
                     partial_ok_wk = np.reshape(input_output_record[backward_step]['input'], (1, len(input_output_record[backward_step]['input'])))
                     partial_ok_ik = self._network[backward_step]['weight']
                     partial_ik_o_k_minus_one = self._d_activation(backward_step-1, input_output_record[backward_step-1]['linear_output'])
 
-                    # Stochastic Gradient Descent
+                    # Stochastic Gradient Descent (SGD)
                     self._network[backward_step]['weight'] -= self._learning_rate * np.dot(previous_result ,partial_ok_wk)
                     self._network[backward_step]['bias'] -= self._learning_rate * previous_result
 
+                    # renew previous result for later training
                     if backward_step > 0:
                         previous_result = np.transpose(np.dot(np.transpose(previous_result), partial_ok_ik)) * partial_ik_o_k_minus_one
-                        # print(previous_result)
 
             # print the error in this training epoch
             mse = square_error_sum / len(x)
@@ -77,19 +76,18 @@ class NeuralNetwork:
                 tensor = self._activation(index=index, vector=tensor)
             y_predict.append(np.reshape(tensor, newshape=(1, len(tensor)))[0])
 
-        return np.array(y_predict)
+        y_predict = np.array(y_predict)
+        return y_predict
 
     def evaluate(self, x, y):
         y_predict = self.predict(x)
-        correct_num = 0
+        error = 0
         for index, row in enumerate(y_predict):
-            true_label = y[index]
-            predict_label = int(np.round(row[0]))
-            if true_label == predict_label:
-                correct_num += 1
-            else:
-                continue
-        return correct_num / len(x)
+            y_difference = row - y[index]
+            print(y_difference)
+            error += np.sqrt(np.dot(y_difference, y_difference))
+        average_square_error = error / len(x)
+        return average_square_error
 
     def _initialize_network(self):
         # check mistake
@@ -222,7 +220,7 @@ if __name__ == '__main__':
     # train neural net to predict
     dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=len(train_y[0]),
                         neuron_list=[5, 1], activation_list=['relu', 'sigmoid'],
-                        learning_rate=0.01, epoch=100)
+                        learning_rate=0.1, epoch=100)
     dnn.train(x=train_x, y=train_y)
     accuracy = dnn.evaluate(x=test_x, y=test_y)
     print('Accuracy: ' + str(accuracy))
