@@ -106,10 +106,10 @@ class NeuralNetwork:
             layer = dict()
             # define layer weight and bias
             if index == 0:
-                layer['weight'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, self._input_dim))
+                layer['weight'] = np.random.normal(loc=0, scale=0.05, size=(neuron_num, self._input_dim))
             else:
-                layer['weight'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, self._neuron_list[index-1]))
-            layer['bias'] = np.random.normal(loc=0, scale=0.1, size=(neuron_num, 1))
+                layer['weight'] = np.random.normal(loc=0, scale=0.05, size=(neuron_num, self._neuron_list[index-1]))
+            layer['bias'] = np.random.normal(loc=0, scale=0.05, size=(neuron_num, 1))
 
             # define the activation function(you have two options: rectified linear unit or sigmoid)
             if self._activation_list[index] not in {'relu', 'sigmoid'}:
