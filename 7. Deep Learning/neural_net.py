@@ -49,19 +49,15 @@ class NeuralNetwork:
                     partial_ik_o_k_minus_one = self._d_activation(backward_step-1, input_output_record[backward_step-1]['linear_output'])
 
                     # Stochastic Gradient Descent
-                    self._network[backward_step]['weight'] = self._network[backward_step]['weight'] - \
-                                                             self._learning_rate * \
-                                                             np.dot(previous_result ,partial_ok_wk)
-                    self._network[backward_step]['bias'] = self._network[backward_step]['bias'] - \
-                                                           self._learning_rate * \
-                                                           previous_result
+                    self._network[backward_step]['weight'] -= self._learning_rate * np.dot(previous_result ,partial_ok_wk)
+                    self._network[backward_step]['bias'] -= self._learning_rate * previous_result
                     if backward_step > 0:
                         previous_result = np.transpose(np.dot(np.transpose(previous_result), partial_ok_ik)) * \
                                           partial_ik_o_k_minus_one
 
             # print the error in this training epoch
             mse = square_error_sum / len(x)
-            # print('------The MSE of the {0} epoch is {1}------'.format(str(e + 1), mse))
+            print('------The MSE of the {0} epoch is {1}------'.format(str(e + 1), mse))
 
     def predict(self, x):
         y_predict = np.zeros((len(x), self._output_dim))
@@ -199,7 +195,7 @@ if __name__ == '__main__':
     breast_cancer_y = breast_cancer_y[random_idx]
 
     # split the data into training data set and testing data set
-    train_rate = 0.9
+    train_rate = 0.8
     train_num = int(train_rate*len(breast_cancer_x))
     train_x = breast_cancer_x[:train_num]
     train_y = breast_cancer_y[:train_num]
@@ -207,8 +203,8 @@ if __name__ == '__main__':
     test_y = breast_cancer_y[train_num:]
 
     # train neural net to predict
-    dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=1, neuron_list=[15, 10, 5, 1],
-                        activation_list=['relu', 'relu', 'relu', 'sigmoid'], learning_rate=0.01, epoch=100)
+    dnn = NeuralNetwork(input_dim=len(train_x[0]), output_dim=1, neuron_list=[10, 5, 1],
+                        activation_list=['relu', 'relu', 'sigmoid'], learning_rate=0.1, epoch=100)
     dnn.train(x=train_x, y=train_y)
     accuracy = dnn.evaluate(x=test_x, y=test_y)
     print('Accuracy: ' + str(accuracy))
