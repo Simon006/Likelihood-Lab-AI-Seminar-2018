@@ -8,13 +8,15 @@ from keras.optimizers import SGD
 
 
 class DeepQNet:
-    def __init__(self, n_actions, n_features, learning_rate, momentum, l2_penalty, e_greedy, memory_size):
+    def __init__(self, n_actions, n_features, learning_rate, momentum,
+                 l2_penalty, discount_factor, e_greedy, memory_size):
         # basic agent information
         self._n_actions = n_actions
         self._n_features = n_features
         self._learning_rate = learning_rate
         self._momentum = momentum
         self._l2_penalty = l2_penalty
+        self._discount_factor = discount_factor
         self._e_greedy = e_greedy
         self._memory_size = memory_size
 
