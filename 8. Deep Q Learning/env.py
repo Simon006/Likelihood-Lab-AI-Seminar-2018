@@ -2,7 +2,7 @@ import gym
 
 
 class CartPoleEnv:
-    def __init__(self, agent, game_epoch, is_render):
+    def __init__(self, agent, game_epoch, is_render_image):
         # construct gym cart pole environment
         self._env = gym.make('CartPole-v0')
         self._env = self._env.unwrapped
@@ -14,7 +14,7 @@ class CartPoleEnv:
         self._game_epoch = game_epoch
 
         # display the game on the screen
-        self._is_render = is_render
+        self._is_render_image = is_render_image
 
     def run(self):
         for e in range(self._game_epoch):
@@ -27,7 +27,7 @@ class CartPoleEnv:
 
             while True:
                 # render the game to screen
-                if self._is_render:
+                if self._is_render_image:
                     self._env.render()
 
                 # reinforcement learning agent choose which action to take

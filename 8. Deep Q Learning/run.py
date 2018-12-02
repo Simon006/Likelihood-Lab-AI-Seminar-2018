@@ -16,6 +16,6 @@ if __name__ == '__main__':
 
     env = CartPoleEnv(agent=dqn,
                       game_epoch=10000,
-                      is_render=False)
+                      is_render_image=False)
 
     env.run()
