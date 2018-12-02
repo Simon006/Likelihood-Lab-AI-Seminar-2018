@@ -12,7 +12,7 @@ if __name__ == '__main__':
                    batch_size=5,
                    discount_factor=0.9,
                    e_greedy=0.3,
-                   memory_size=500)
+                   memory_size=5000)
 
     env = CartPoleEnv(agent=dqn,
                       game_epoch=1000)

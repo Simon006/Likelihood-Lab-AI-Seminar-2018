@@ -18,6 +18,10 @@ class CartPoleEnv:
             # receive initial observation
             observation_current = self._env.reset()
 
+            # performances of this game epoch
+            total_step = 0
+            total_reward = 0
+
             while True:
                 # render the game to screen
                 self._env.render()
@@ -35,9 +39,16 @@ class CartPoleEnv:
                 if self._agent.have_enough_data():
                     self._agent.train()
 
+                # update game information
+                total_step += 1
+                total_reward += reward
+
                 # if the game is finished, we reset the game to restart.
                 # if the game is not finished, we keep on playing in the current game.
                 if is_done:
+                    print('>>> the {0}th game is over with {1} total steps and {2} total rewards.'.format(e+1,
+                                                                                                          total_step,
+                                                                                                          total_reward))
                     break
                 else:
                     observation_current = observation_next
