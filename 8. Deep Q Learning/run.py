@@ -11,8 +11,8 @@ if __name__ == '__main__':
                    fit_epoch=20,
                    batch_size=5,
                    discount_factor=0.9,
-                   e_greedy=0.3,
-                   memory_size=5000)
+                   e_greedy=0.1,
+                   memory_size=10000)
 
     env = CartPoleEnv(agent=dqn,
                       game_epoch=10000,

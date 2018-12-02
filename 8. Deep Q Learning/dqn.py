@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import random as rd
 from keras.optimizers import SGD
@@ -27,6 +28,13 @@ class DeepQNet:
         # build neural network
         self._net = self._build_network()
 
+        # load model weights if existed
+        if os.path.exists('weights.hdf5'):
+            print('load weights from disk.')
+            self._net.load_weights('load weights from disk.')
+        else:
+            print('use random initialized weights.')
+
         # memory pool
         self._memory_pool = []
 
@@ -50,7 +58,14 @@ class DeepQNet:
             target_q_value[index][0][action] = reward + self._discount_factor * future_optimal_q
 
         # train the network
-        self._net.fit(observation_sample, target_q_value, epochs=self._fit_epoch, batch_size=self._batch_size, verbose=1)
+        self._net.fit(observation_sample,
+                      target_q_value,
+                      epochs=self._fit_epoch,
+                      batch_size=self._batch_size,
+                      verbose=1)
+
+        # save the model
+        self._net.save_weights('weights.hdf5', overwrite=True)
 
     def choose_action(self, observation):
         # use e-greedy strategy to generate action
