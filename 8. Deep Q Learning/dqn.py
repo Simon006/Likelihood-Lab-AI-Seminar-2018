@@ -74,8 +74,7 @@ class DeepQNet:
             action = rd.randint(0, self._n_actions-1)
         else:
             # optimal action
-            observation = np.reshape(observation, newshape=(1, 1, self._n_features))
-            q_vector = self._net.predict(observation)
+            q_vector = self._net.predict(np.reshape(observation, newshape=(1, 1, self._n_features)))
             action = np.argmax(q_vector)
         return action
 
@@ -103,6 +102,7 @@ class DeepQNet:
         x = Activation('relu')(x)
 
         x = Dense(self._n_actions, kernel_regularizer=l2(self._l2_penalty))(x)
+        x = Activation('relu')(x)
 
         # define the network
         net = Model(inputs=init_x, outputs=x)
