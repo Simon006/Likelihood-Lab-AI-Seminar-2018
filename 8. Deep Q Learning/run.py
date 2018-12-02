@@ -8,8 +8,8 @@ if __name__ == '__main__':
                    learning_rate=2e-3,
                    momentum=1e-1,
                    l2_penalty=1e-4,
-                   fit_epoch=20,
-                   batch_size=5,
+                   fit_epoch=10,
+                   batch_size=10,
                    discount_factor=0.9,
                    e_greedy=0.1,
                    memory_size=10000)
