@@ -88,6 +88,13 @@ class DeepQNet:
         else:
             return False
 
+    def clear_excessive_data(self):
+        if len(self._memory_pool) >= 10 * self._memory_size:
+            cut_point = int(0.5*len(self._memory_pool))
+            self._memory_pool = self._memory_pool[cut_point:]
+        else:
+            pass
+
     def _build_network(self):
         # define the input format
         init_x = Input((1, self._n_features))

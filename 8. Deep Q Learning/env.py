@@ -43,6 +43,9 @@ class CartPoleEnv:
                 if self._agent.have_enough_new_data():
                     self._agent.train()
 
+                # clear the data if it is too many
+                self._agent.clear_excessive_data()
+
                 # update game information
                 total_step += 1
                 total_reward += reward
