@@ -1,4 +1,5 @@
 import gym
+import numpy as np
 
 
 class CartPoleEnv:
@@ -17,14 +18,23 @@ class CartPoleEnv:
         self._is_render_image = is_render_image
 
     def run(self):
+        # record each game's reward
+        reward_list = []
+
+        # play No.e game
         for e in range(self._game_epoch):
+
+            # print information if we have enough games
+            if len(reward_list) % 500 == 0:
+                print('> average game rewards: ' + str(np.average(reward_list)))
+
             # receive initial observation
             observation_current = self._env.reset()
 
             # performances of this game epoch
-            total_step = 0
-            total_reward = 0
+            reward_this_epoch = 0
 
+            # run this game till end
             while True:
                 # render the game to screen
                 if self._is_render_image:
@@ -43,19 +53,19 @@ class CartPoleEnv:
                 if self._agent.have_enough_new_data():
                     self._agent.train()
 
-                # clear the data if it is too many
+                # clear the train data if it is too many
                 self._agent.clear_excessive_data()
 
                 # update game information
-                total_step += 1
-                total_reward += reward
+                reward_this_epoch += reward
 
                 # if the game is finished, we reset the game to restart.
                 # if the game is not finished, we keep on playing in the current game.
                 if is_done:
-                    print('>>> the {0}th game is over with {1} total steps and {2} total rewards.'.format(e+1,
-                                                                                                          total_step,
-                                                                                                          total_reward))
                     break
                 else:
                     observation_current = observation_next
+                    continue
+
+            # record the performance of this game epoch
+            reward_list.append(reward_this_epoch)
