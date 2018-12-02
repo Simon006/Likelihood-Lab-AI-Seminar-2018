@@ -1,5 +1,6 @@
 import gym
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class CartPoleEnv:
@@ -69,3 +70,10 @@ class CartPoleEnv:
 
             # record the performance of this game epoch
             reward_list.append(reward_this_epoch)
+
+        # plot the reward list
+        plt.plot(reward_list, label='reward', color='lightgray')
+        plt.legend(loc=1)
+        plt.xlabel('Game Number')
+        plt.ylabel('Reward')
+        plt.show()
