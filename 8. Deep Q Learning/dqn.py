@@ -36,6 +36,7 @@ class DeepQNet:
         observation_sample = np.array([sample[0] for sample in sample_train_date])
 
         # construct the target by Bellman Equation
+        print(observation_sample.shape)
         target_q_value = self._net.predict(observation_sample)
         for index in range(len(target_q_value)):
             action = sample_train_date[index][1]
@@ -55,12 +56,12 @@ class DeepQNet:
         # use e-greedy strategy to generate action
         if rd.random() < self._e_greedy:
             # random action
-            action = rd.randint(0, self._n_actions)
+            action = rd.randint(0, self._n_actions-1)
         else:
             # optimal action
+            observation = np.reshape(observation, newshape=(1, 1, self._n_features))
             q_vector = self._net.predict(observation)
             action = np.argmax(q_vector)
-
         return action
 
     def store_train_data(self, observation_current, action, reward, observation_next, is_done):
@@ -75,7 +76,7 @@ class DeepQNet:
 
     def _build_network(self):
         # define the input format
-        init_x = Input((1, 1, self._n_features))
+        init_x = Input((1, self._n_features))
 
         # multiple dense layers
         x = Dense(15, kernel_regularizer=l2(self._l2_penalty))(init_x)

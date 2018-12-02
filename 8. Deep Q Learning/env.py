@@ -1,5 +1,4 @@
 import gym
-from dqn import DeepQNet
 
 
 class CartPoleEnv:
