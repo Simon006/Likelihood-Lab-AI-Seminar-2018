@@ -25,7 +25,7 @@ class CartPoleEnv:
         for e in range(self._game_epoch):
 
             # print information if we have enough games
-            if len(reward_list) % 1000 == 0:
+            if (len(reward_list) % 1000 == 0) and (len(reward_list) > 0):
                 print('> average game rewards: ' + str(np.average(reward_list)))
 
             # receive initial observation
