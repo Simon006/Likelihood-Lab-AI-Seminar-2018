@@ -8,5 +8,14 @@ class DeepQNet:
     def train(self):
         pass
 
-    def action(self):
+    def choose_action(self):
+        pass
+
+    def store_train_data(self):
+        pass
+
+    def have_enough_data(self):
+        pass
+
+    def _build_network(self):
         pass

@@ -33,7 +33,7 @@ class CartPoleEnv:
                 self._agent.store_train_data(observation_current, action, reward, observation_next)
 
                 # train the agent when data is enough
-                if self._agent.is_enough_data():
+                if self._agent.have_enough_data():
                     self._agent.train()
 
                 # if the game is finished, we reset the game to restart.
