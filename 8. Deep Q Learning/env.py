@@ -27,7 +27,7 @@ class CartPoleEnv:
 
             # print information if we have enough games
             if (len(reward_list) % 1000 == 0) and (len(reward_list) > 0):
-                print('> average game rewards: ' + str(np.average(reward_list)))
+                print('> average recent game rewards: ' + str(np.average(reward_list[-1000:])))
 
             # receive initial observation
             observation_current = self._env.reset()
