@@ -2,10 +2,10 @@ import gym
 from dqn import DeepQNet
 
 
-class SpaceInvadersEnv:
+class CartPoleEnv:
     def __init__(self, agent, epoch):
-        # construct gym space invaders environment
-        self._env = gym.make('SpaceInvaders-v0')
+        # construct gym cart pole environment
+        self._env = gym.make('CartPole-v0')
         self._env = self._env.unwrapped
 
         # define the reinforcement learning agent
@@ -46,5 +46,5 @@ class SpaceInvadersEnv:
 
 if __name__ == '__main__':
     dqn = DeepQNet()
-    env = SpaceInvadersEnv(agent=dqn, epoch=1000)
+    env = CartPoleEnv(agent=dqn, epoch=1000)
     env.run()
