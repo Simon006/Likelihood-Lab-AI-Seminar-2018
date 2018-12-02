@@ -33,13 +33,23 @@ class DeepQNet:
     def train(self):
         # sample train data uniformly from memory pool to conduct experience replay
         sample_train_date = rd.sample(self._memory_pool, self._memory_size)
+        observation_sample = np.array([sample[0] for sample in sample_train_date])
 
-        # construct the training data-set by Bellman Equation
-        x = np.array([sample[0] for sample in sample_train_date])
-        y = ...
+        # construct the target by Bellman Equation
+        target_q_value = self._net.predict(observation_sample)
+        for index in range(len(target_q_value)):
+            action = sample_train_date[index][1]
+            reward = sample_train_date[index][2]
+            observation_next = sample_train_date[index][3]
+            is_done = sample_train_date[index][4]
+            if not is_done:
+                future_optimal_q = np.max(self._net.predict(observation_next))
+            else:
+                future_optimal_q = 0
+            target_q_value[index][action] = reward + self._discount_factor * future_optimal_q
 
         # train the network
-        self._net.fit(x, y, epochs=self._fit_epoch, batch_size=self._batch_size, verbose=1)
+        self._net.fit(observation_sample, target_q_value, epochs=self._fit_epoch, batch_size=self._batch_size, verbose=1)
 
     def choose_action(self, observation):
         # use e-greedy strategy to generate action
@@ -53,9 +63,9 @@ class DeepQNet:
 
         return action
 
-    def store_train_data(self, observation_current, action, reward, observation_next):
-        data_tuple = (observation_current, action, reward, observation_next)
-        self._memory_pool.append(data_tuple)
+    def store_train_data(self, observation_current, action, reward, observation_next, is_done):
+        data_list = [observation_current, action, reward, observation_next, is_done]
+        self._memory_pool.append(data_list)
 
     def have_enough_data(self):
         if len(self._memory_pool) >= self._memory_size:

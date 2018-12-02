@@ -27,10 +27,10 @@ class CartPoleEnv:
                 action = self._agent.choose_action(observation_current)
 
                 # environment receives the action the agent took
-                observation_next, reward, done, info = self._env.step(action)
+                observation_next, reward, is_done, info = self._env.step(action)
 
                 # store the data for training
-                self._agent.store_train_data(observation_current, action, reward, observation_next)
+                self._agent.store_train_data(observation_current, action, reward, observation_next, is_done)
 
                 # train the agent when data is enough
                 if self._agent.have_enough_data():
@@ -38,7 +38,7 @@ class CartPoleEnv:
 
                 # if the game is finished, we reset the game to restart.
                 # if the game is not finished, we keep on playing in the current game.
-                if done:
+                if is_done:
                     break
                 else:
                     observation_current = observation_next
