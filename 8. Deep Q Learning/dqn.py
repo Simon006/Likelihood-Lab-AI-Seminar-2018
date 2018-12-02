@@ -62,7 +62,7 @@ class DeepQNet:
                       target_q_value,
                       epochs=self._fit_epoch,
                       batch_size=self._batch_size,
-                      verbose=1)
+                      verbose=0)
 
         # save the model
         self._net.save_weights('weights.hdf5', overwrite=True)
