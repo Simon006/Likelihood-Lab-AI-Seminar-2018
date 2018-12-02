@@ -68,8 +68,8 @@ class DeepQNet:
         data_list = [observation_current, action, reward, observation_next, is_done]
         self._memory_pool.append(data_list)
 
-    def have_enough_data(self):
-        if len(self._memory_pool) >= self._memory_size:
+    def have_enough_new_data(self):
+        if len(self._memory_pool) % self._memory_size == 0:
             return True
         else:
             return False
