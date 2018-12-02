@@ -31,7 +31,7 @@ class DeepQNet:
         # load model weights if existed
         if os.path.exists('weights.hdf5'):
             print('load weights from disk.')
-            self._net.load_weights('load weights from disk.')
+            self._net.load_weights('weights.hdf5')
         else:
             print('use random initialized weights.')
 
