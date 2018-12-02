@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 class CartPoleEnv:
-    def __init__(self, agent, game_epoch, is_render_image, verbose):
+    def __init__(self, agent, game_epoch, is_render_image, is_verbose):
         # construct gym cart pole environment
         self._env = gym.make('CartPole-v0')
         self._env = self._env.unwrapped
@@ -19,7 +19,7 @@ class CartPoleEnv:
         self._is_render_image = is_render_image
 
         # display the reward information of each game
-        self._verbose = verbose
+        self._is_verbose = is_verbose
 
     def run(self):
         # record each game's reward
@@ -66,7 +66,7 @@ class CartPoleEnv:
                 # if the game is finished, we reset the game to restart.
                 # if the game is not finished, we keep on playing in the current game.
                 if is_done:
-                    if self._verbose:
+                    if self._is_verbose:
                         print('> reward for the {0}th game is {1}.'.format(e+1, reward_this_epoch))
                     break
                 else:
