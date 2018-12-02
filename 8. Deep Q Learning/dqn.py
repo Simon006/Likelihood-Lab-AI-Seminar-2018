@@ -33,21 +33,21 @@ class DeepQNet:
     def train(self):
         # sample train data uniformly from memory pool to conduct experience replay
         sample_train_date = rd.sample(self._memory_pool, self._memory_size)
-        observation_sample = np.array([sample[0] for sample in sample_train_date])
+        observation_sample = np.reshape(np.array([sample[0] for sample in sample_train_date]),
+                                        newshape=(self._memory_size, 1, self._n_features))
 
         # construct the target by Bellman Equation
-        print(observation_sample.shape)
         target_q_value = self._net.predict(observation_sample)
         for index in range(len(target_q_value)):
             action = sample_train_date[index][1]
             reward = sample_train_date[index][2]
-            observation_next = sample_train_date[index][3]
+            observation_next = np.reshape(sample_train_date[index][3], newshape=(1, 1, self._n_features))
             is_done = sample_train_date[index][4]
             if not is_done:
                 future_optimal_q = np.max(self._net.predict(observation_next))
             else:
                 future_optimal_q = 0
-            target_q_value[index][action] = reward + self._discount_factor * future_optimal_q
+            target_q_value[index][0][action] = reward + self._discount_factor * future_optimal_q
 
         # train the network
         self._net.fit(observation_sample, target_q_value, epochs=self._fit_epoch, batch_size=self._batch_size, verbose=1)
@@ -88,8 +88,6 @@ class DeepQNet:
         x = Activation('relu')(x)
 
         x = Dense(self._n_actions, kernel_regularizer=l2(self._l2_penalty))(x)
-        x = BatchNormalization()(x)
-        x = Activation('softmax')(x)
 
         # define the network
         net = Model(inputs=init_x, outputs=x)
