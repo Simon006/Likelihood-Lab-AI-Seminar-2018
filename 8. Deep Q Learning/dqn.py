@@ -34,7 +34,7 @@ class DeepQNet:
         # sample train data uniformly from memory pool to conduct experience replay
         sample_train_date = rd.sample(self._memory_pool, self._memory_size)
 
-        # construct the training dataset by Bellman Equation
+        # construct the training data-set by Bellman Equation
         x = np.array([sample[0] for sample in sample_train_date])
         y = ...
 
