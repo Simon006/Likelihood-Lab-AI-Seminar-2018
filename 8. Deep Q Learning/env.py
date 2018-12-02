@@ -3,7 +3,7 @@ from dqn import DeepQNet
 
 
 class CartPoleEnv:
-    def __init__(self, agent, epoch):
+    def __init__(self, agent, game_epoch):
         # construct gym cart pole environment
         self._env = gym.make('CartPole-v0')
         self._env = self._env.unwrapped
@@ -12,10 +12,10 @@ class CartPoleEnv:
         self._agent = agent
 
         # number of games to play
-        self._epoch = epoch
+        self._game_epoch = game_epoch
 
     def run(self):
-        for e in range(self._epoch):
+        for e in range(self._game_epoch):
             # receive initial observation
             observation_current = self._env.reset()
 
@@ -50,11 +50,13 @@ if __name__ == '__main__':
                    learning_rate=2e-3,
                    momentum=1e-1,
                    l2_penalty=1e-4,
+                   fit_epoch=20,
+                   batch_size=10,
                    discount_factor=0.9,
                    e_greedy=0.3,
                    memory_size=2000)
 
     env = CartPoleEnv(agent=dqn,
-                      epoch=1000)
+                      game_epoch=1000)
 
     env.run()

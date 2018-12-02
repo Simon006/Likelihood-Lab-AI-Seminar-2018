@@ -1,4 +1,5 @@
 import numpy as np
+import random as rd
 from keras.optimizers import SGD
 from keras.regularizers import l2
 from keras.engine.training import Model
@@ -9,13 +10,16 @@ from keras.layers.normalization import BatchNormalization
 
 class DeepQNet:
     def __init__(self, n_actions, n_features, learning_rate, momentum,
-                 l2_penalty, discount_factor, e_greedy, memory_size):
+                 l2_penalty, fit_epoch, batch_size, discount_factor,
+                 e_greedy, memory_size):
         # basic agent information
         self._n_actions = n_actions
         self._n_features = n_features
         self._learning_rate = learning_rate
         self._momentum = momentum
         self._l2_penalty = l2_penalty
+        self._fit_epoch = fit_epoch
+        self._batch_size = batch_size
         self._discount_factor = discount_factor
         self._e_greedy = e_greedy
         self._memory_size = memory_size
@@ -27,13 +31,21 @@ class DeepQNet:
         self._memory_pool = []
 
     def train(self):
-        pass
+        # sample train data uniformly from memory pool to conduct experience replay
+        sample_train_date = rd.sample(self._memory_pool, self._memory_size)
+
+        # construct the training dataset by Bellman Equation
+        x = np.array([sample[0] for sample in sample_train_date])
+        y = ...
+
+        # train the network
+        self._net.fit(x, y, epochs=self._fit_epoch, batch_size=self._batch_size, verbose=1)
 
     def choose_action(self, observation):
         # use e-greedy strategy to generate action
-        if np.random.random() < self._e_greedy:
+        if rd.random() < self._e_greedy:
             # random action
-            action = np.random.randint(0, self._n_actions)
+            action = rd.randint(0, self._n_actions)
         else:
             # optimal action
             q_vector = self._net.predict(observation)
