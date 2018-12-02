@@ -1,4 +1,3 @@
-import gym
 import keras
 
 
@@ -10,9 +9,4 @@ class DeepQNet:
         pass
 
     def action(self):
-        pass
-
-
-class Env:
-    def __init__(self):
         pass
