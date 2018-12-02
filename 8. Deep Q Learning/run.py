@@ -15,6 +15,7 @@ if __name__ == '__main__':
                    memory_size=5000)
 
     env = CartPoleEnv(agent=dqn,
-                      game_epoch=10000)
+                      game_epoch=10000,
+                      is_render=False)
 
     env.run()
