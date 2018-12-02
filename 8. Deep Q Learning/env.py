@@ -10,3 +10,4 @@ if __name__ == '__main__':
     env = gym.make('SpaceInvaders-v0')
     env.reset()
     env.render()
+    env.close()
