@@ -1,10 +1,10 @@
 import numpy as np
-from keras.engine.topology import Input
+from keras.optimizers import SGD
+from keras.regularizers import l2
 from keras.engine.training import Model
+from keras.engine.topology import Input
 from keras.layers.core import Activation, Dense
 from keras.layers.normalization import BatchNormalization
-from keras.regularizers import l2
-from keras.optimizers import SGD
 
 
 class DeepQNet:
@@ -23,23 +23,39 @@ class DeepQNet:
         # build neural network
         self._net = self._build_network()
 
+        # memory pool
+        self._memory_pool = []
+
     def train(self):
         pass
 
-    def choose_action(self):
-        pass
+    def choose_action(self, observation):
+        # use e-greedy strategy to generate action
+        if np.random.random() < self._e_greedy:
+            # random action
+            action = np.random.randint(0, self._n_actions)
+        else:
+            # optimal action
+            q_vector = self._net.predict(observation)
+            action = np.argmax(q_vector)
 
-    def store_train_data(self):
-        pass
+        return action
+
+    def store_train_data(self, observation_current, action, reward, observation_next):
+        data_tuple = (observation_current, action, reward, observation_next)
+        self._memory_pool.append(data_tuple)
 
     def have_enough_data(self):
-        pass
+        if len(self._memory_pool) >= self._memory_size:
+            return True
+        else:
+            return False
 
     def _build_network(self):
         # define the input format
         init_x = Input((1, 1, self._n_features))
 
-        # Multiple Dense Layers
+        # multiple dense layers
         x = Dense(15, kernel_regularizer=l2(self._l2_penalty))(init_x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
