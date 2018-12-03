@@ -50,6 +50,12 @@ class CartPoleEnv:
                 # environment receives the action the agent took
                 observation_next, reward, is_done, info = self._env.step(action)
 
+                # adjust the reward for better learning
+                x, _, theta, _ = observation_next
+                r1 = (self._env.x_threshold - abs(x)) / self._env.x_threshold - 0.8
+                r2 = (self._env.theta_threshold_radians - abs(theta)) / self._env.theta_threshold_radians - 0.5
+                reward = r1 + r2
+
                 # store the data for training
                 self._agent.store_train_data(observation_current, action, reward, observation_next, is_done)
 
