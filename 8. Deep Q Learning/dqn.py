@@ -99,11 +99,12 @@ class DeepQNet:
         # define the input format
         init_x = Input((1, self._n_features))
 
-        # multiple dense layers
+        # dense input layer
         x = Dense(10, kernel_regularizer=l2(self._l2_penalty))(init_x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
 
+        # dense output layer
         x = Dense(self._n_actions, kernel_regularizer=l2(self._l2_penalty))(x)
 
         # define the network
