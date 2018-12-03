@@ -100,16 +100,11 @@ class DeepQNet:
         init_x = Input((1, self._n_features))
 
         # multiple dense layers
-        x = Dense(15, kernel_regularizer=l2(self._l2_penalty))(init_x)
-        x = BatchNormalization()(x)
-        x = Activation('relu')(x)
-
-        x = Dense(10, kernel_regularizer=l2(self._l2_penalty))(x)
+        x = Dense(10, kernel_regularizer=l2(self._l2_penalty))(init_x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
 
         x = Dense(self._n_actions, kernel_regularizer=l2(self._l2_penalty))(x)
-        x = Activation('relu')(x)
 
         # define the network
         net = Model(inputs=init_x, outputs=x)
