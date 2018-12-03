@@ -100,7 +100,7 @@ class DeepQNet:
         init_x = Input((1, self._n_features))
 
         # dense input layer
-        x = Dense(10, kernel_regularizer=l2(self._l2_penalty))(init_x)
+        x = Dense(8, kernel_regularizer=l2(self._l2_penalty))(init_x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
 
