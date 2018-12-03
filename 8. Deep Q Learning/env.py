@@ -22,21 +22,26 @@ class CartPoleEnv:
         self._is_verbose = is_verbose
 
     def run(self):
-        # record each game's reward
+        # record each game's reward and step
         reward_list = []
+        step_list = []
 
         # play No.e game
         for e in range(self._game_epoch):
 
             # print information if we have enough games
-            if (len(reward_list) % 1000 == 0) and (len(reward_list) > 0):
+            if len(reward_list) % 1000 == 0 and len(reward_list) > 0:
                 print('> average recent game rewards: ' + str(np.average(reward_list[-1000:])))
+
+            if len(step_list) % 1000 == 0 and len(step_list) > 0:
+                print('> average recent game steps: ' + str(np.average(step_list[-1000:])))
 
             # receive initial observation
             observation_current = self._env.reset()
 
             # performances of this game epoch
             reward_this_epoch = 0
+            step_this_epoch = 0
 
             # run this game till end
             while True:
@@ -68,12 +73,14 @@ class CartPoleEnv:
 
                 # update game information
                 reward_this_epoch += reward
+                step_this_epoch += 1
 
                 # if the game is finished, we reset the game to restart.
                 # if the game is not finished, we keep on playing in the current game.
                 if is_done:
                     if self._is_verbose:
                         print('> reward for the {0}th game is {1}.'.format(e+1, reward_this_epoch))
+                        print('> step for the {0}th game is {1}.'.format(e+1, step_this_epoch))
                     break
                 else:
                     observation_current = observation_next
@@ -81,10 +88,18 @@ class CartPoleEnv:
 
             # record the performance of this game epoch
             reward_list.append(reward_this_epoch)
+            step_list.append(step_this_epoch)
 
         # plot the reward list
         plt.plot(reward_list, label='reward', color='lightgray')
         plt.legend(loc=1)
         plt.xlabel('Game Number')
         plt.ylabel('Reward')
+        plt.show()
+
+        # plot the step list
+        plt.plot(step_list, label='step', color='lightgray')
+        plt.legend(loc=1)
+        plt.xlabel('Game Number')
+        plt.ylabel('Step')
         plt.show()
